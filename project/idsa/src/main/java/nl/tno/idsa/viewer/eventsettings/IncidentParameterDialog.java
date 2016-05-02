@@ -18,7 +18,7 @@ import java.util.Map;
  * Created by jongsd on 3-9-15.
  */
 // TODO Document class.
-public class EventParameterDialog extends JDialog {
+public class IncidentParameterDialog extends JDialog {
 
     // TODO Add functionality (complex) that allows specifying the parameters of actions ...
     // when the event's enabling action is abstract. Example: "Road block" is enabled by RoadBlock, and Arrest
@@ -28,11 +28,11 @@ public class EventParameterDialog extends JDialog {
     // this to work, we must find an event that has Arrest as the enabling action and plan this event instead of
     // "Road block". This sounds like a 'cheating' way around a clear design choice.
 
-    private EventParameterDialog me = this;
+    private IncidentParameterDialog me = this;
     private Incident selectedIncident;
     private Map<Variable, EventParameterRendererComponent> componentMap = new HashMap<>();
 
-    public EventParameterDialog(final Frame parent, final Incident incident, final Environment environment) {
+    public IncidentParameterDialog(final Frame parent, final Incident incident, final Environment environment) {
 
         super(parent);
 

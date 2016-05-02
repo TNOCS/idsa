@@ -19,13 +19,13 @@ import java.util.Vector;
  * Created by jongsd on 3-9-15.
  */
 // TODO Document class.
-public class EventSelectorDialog extends JDialog {
+public class IncidentSelectorDialog extends JDialog {
 
     private final World world;
 
     private Incident selectedIncident;
 
-    public EventSelectorDialog(Frame parent, World world) {
+    public IncidentSelectorDialog(Frame parent, World world) {
 
         super(parent);
         this.world = world;

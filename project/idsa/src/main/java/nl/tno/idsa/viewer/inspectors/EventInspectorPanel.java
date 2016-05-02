@@ -7,7 +7,7 @@ import nl.tno.idsa.framework.semantics_impl.actions.Action;
 import nl.tno.idsa.framework.world.Time;
 import nl.tno.idsa.viewer.SelectionObserver;
 import nl.tno.idsa.viewer.components.SimpleGridBagPanel;
-import nl.tno.idsa.viewer.observers.RunningEvents;
+import nl.tno.idsa.viewer.observers.RunningIncidents;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -21,7 +21,7 @@ import java.util.List;
 // TODO Document class.
 public class EventInspectorPanel extends InspectorPanel implements Observer {
 
-    private final RunningEvents runningEventsObserver;
+    private final RunningIncidents runningIncidentsObserver;
     private final SelectionObserver selectionObserver;
 
     private JList<Incident> eventList;
@@ -31,11 +31,11 @@ public class EventInspectorPanel extends InspectorPanel implements Observer {
     private List<Incident> incidents;
     private Vector<Agent> eventAgents = new Vector<>();
 
-    public EventInspectorPanel(RunningEvents runningEventsObserver, SelectionObserver selectionObserver) {
+    public EventInspectorPanel(RunningIncidents runningIncidentsObserver, SelectionObserver selectionObserver) {
         super(Side.LEFT);
 
-        this.runningEventsObserver = runningEventsObserver;
-        this.runningEventsObserver.addObserver(this);
+        this.runningIncidentsObserver = runningIncidentsObserver;
+        this.runningIncidentsObserver.addObserver(this);
 
         this.selectionObserver = selectionObserver;
         this.selectionObserver.addObserver(this);
@@ -139,7 +139,7 @@ public class EventInspectorPanel extends InspectorPanel implements Observer {
                 incidents.add((Incident) arg);
                 setIncidents(incidents);
             }
-        } else if (o instanceof RunningEvents) {
+        } else if (o instanceof RunningIncidents) {
             if (arg instanceof List) {
                 List list = (List) arg;
                 if ((list.size() > 0 && list.get(0) instanceof Incident)) {

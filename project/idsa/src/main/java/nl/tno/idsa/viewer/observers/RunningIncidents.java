@@ -10,20 +10,20 @@ import java.util.Observable;
  * @author jongsd
  */
 // TODO Document class.
-public class RunningEvents extends Observable {
+public class RunningIncidents extends Observable {
     private final List<Incident> incidents;
 
-    public RunningEvents() {
+    public RunningIncidents() {
         this.incidents = new ArrayList<Incident>();
     }
 
-    public void addEvent(Incident e) {
+    public void addIncident(Incident e) {
         this.incidents.add(e);
         setChanged();
         notifyObservers(this.incidents);
     }
 
-    public void removeEvent(Incident e) {
+    public void removeIncident(Incident e) {
         this.incidents.remove(e);
         setChanged();
         notifyObservers(this.incidents);

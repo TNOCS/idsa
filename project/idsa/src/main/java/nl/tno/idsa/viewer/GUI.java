@@ -14,17 +14,26 @@ import nl.tno.idsa.viewer.components.ProgressDialog;
 
 import java.util.List;
 
-// TODO Document class. Mark it as the main class.
+/**
+ * Main entry point for the GUI application.
+ */
 public class GUI {
 
-    private static final boolean makeAgendas = true; // TODO This is a setting.
+    static {
+        try {
+            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            // Yeah, this doesn't happen.
+        }
+    }
 
     public static void main(String[] args) throws Exception {
 
         ProgressDialog progressDialog = new ProgressDialog(null);
         ProgressNotifier.addObserver(progressDialog);
 
-        Messenger.enableMirrorToConsole(true); // TODO Catch console messages in a graphical element.
+        Messenger.enableMirrorToConsole(true);
+        // TODO Feature: catch console messages in a graphical element.
 
         ProgressNotifier.notifyShowProgress(true);
         ProgressNotifier.notifyProgressMessage("Loading world data...");
@@ -33,8 +42,9 @@ public class GUI {
 
         ProgressNotifier.notifyProgressMessage("Creating environment...");
 
-        // TODO Show a dialog for time and day.
+        // TODO Feature: show a dialog for time and day.
         Environment env;
+
         // Sunday 11:00 Summer
         // env = new Environment(world, new Summer(), null, new Day(14, 6, 2015), new Time(11, 0, 0));
         // Sunday 11:00 Winter
@@ -50,12 +60,12 @@ public class GUI {
 
         PopulationGenerator populationGenerator = new PopulationGenerator(env, new PopulationDataNL());
         ProgressNotifier.notifyProgress(15);
-        env.setPopulation(populationGenerator.generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp")); // TODO Hardcoded input file.
+        env.setPopulation(populationGenerator.generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp")); // TODO Improvement: remove hardcoded input shape file.
         ProgressNotifier.notifyProgress(85);
-        env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), makeAgendas);
+        env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), true); // True -> always make agendas.
 
         // Add some police stations, randomly, as they are not in the world yet.
-        // TODO Create police stations in the world.
+        // TODO Improvement: create police stations in the data instead of in the code.
         System.out.println("Enriching environment...");
         List<Vertex> vertices = world.getVertices();
         int changedVertices = 0;

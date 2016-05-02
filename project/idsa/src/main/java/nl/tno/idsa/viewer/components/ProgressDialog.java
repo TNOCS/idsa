@@ -7,18 +7,9 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * Created by jongsd on 30-10-15.
+ * Simple progress dialog.
  */
-// TODO Document class.
 public class ProgressDialog extends JDialog implements IProgressObserver {
-
-    // One often sees this dialog before anything else.
-    static {
-        try {
-            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-        }
-    }
 
     private final JLabel status;
     private final JProgressBar progressBar;
