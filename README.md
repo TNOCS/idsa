@@ -6,11 +6,12 @@ This repository will hold the complete source code accompanying the paper "Integ
 * an experimentation environment that features (2D) visualization and interaction.
 
 ## How to build
-The source code is written in Java 8 and uses Apache Maven for project dependencies and settings. It can be build and run using popular Java IDE’s such as Eclipse, NetBeans and IntelliJ.
+The source code is written in Java 8 and uses Apache Maven for project dependencies and settings (see pom.xml). It can be build and run using popular Java IDE’s such as Eclipse, NetBeans and IntelliJ.
 
 ## How to run
 Start nl.tno.idsa.viewer.GUI (no arguments) to run the experimentation environment.
 
 ## TODO
-
-1. Release current source code (March 2016).
+1. Configuration file.
+2. Guide to adding your own GIS and census data (replacing the example NL data).
+3. Code documentation and cleanup.
