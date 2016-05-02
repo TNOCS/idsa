@@ -1,0 +1,52 @@
+package nl.tno.idsa.framework.behavior.activities.concrete;
+
+import nl.tno.idsa.framework.agents.Agent;
+import nl.tno.idsa.framework.behavior.activities.possible.PossibleActivity;
+import nl.tno.idsa.framework.behavior.models.Model;
+import nl.tno.idsa.framework.semantics_impl.groups.Group;
+import nl.tno.idsa.framework.semantics_impl.locations.LocationAndTime;
+import nl.tno.idsa.framework.world.Time;
+import nl.tno.idsa.framework.world.Vertex;
+import nl.tno.idsa.library.models.BasicAreaModel;
+
+/**
+ * A simple stationary activity, which optionally uses a basic area model while the agent is at the location.
+ */
+public class BasicStationaryActivity extends Activity {
+
+    /**
+     * Whether the participants should use a model that makes them wander around.
+     */
+    public static enum Wander {
+        OUTSIDE_ONLY, NEVER
+    }
+
+    private Model model;
+
+    public BasicStationaryActivity(PossibleActivity parent, Time start, Time end, Vertex location, Group group, Wander wander) {
+        super(parent, location, start, location, end, group);
+
+        // Create a model so the agent moves around the area, if desired.
+        if (wander == Wander.OUTSIDE_ONLY) {
+            model = new BasicAreaModel();
+            model.setLocationAndEndTime(new LocationAndTime(location.getPoint(), end.getNanos()));
+            model.setActors(group);
+            if (group == null) {
+                throw new Error("Erroneous activity made: " + this); // TODO More graceful error handling.
+            }
+            // TODO Obtain environment in a better way?
+            Agent a = (Agent) group.get(0);
+            model.setEnvironment(a.getEnvironment());
+        }
+    }
+
+    @Override
+    public Model getModel() {
+        return model;
+    }
+
+    @Override
+    public String getName() {
+        return getPossibleActivity().getName();
+    }
+}
