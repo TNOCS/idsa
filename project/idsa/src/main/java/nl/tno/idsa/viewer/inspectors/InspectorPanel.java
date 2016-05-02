@@ -13,9 +13,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Created by jongsd on 27-10-15.
+ * Superclass for all inspector panels.
  */
-// TODO Document class.
 public abstract class InspectorPanel extends CollapsePanel {
 
     public InspectorPanel(Side side) {
@@ -26,11 +25,11 @@ public abstract class InspectorPanel extends CollapsePanel {
         JLabel vLabel = new JLabel(value);
         vLabel.setHorizontalAlignment(SwingConstants.LEFT);
         vLabel.setVerticalAlignment(SwingConstants.TOP);
-        return EventInspectorPanel.createRow(new JLabel(label), vLabel);
+        return IncidentInspectorPanel.createRow(new JLabel(label), vLabel);
     }
 
     protected static JComponent[] createRow(String label, JComponent value) {
-        return EventInspectorPanel.createRow(new JLabel(label), value);
+        return IncidentInspectorPanel.createRow(new JLabel(label), value);
     }
 
     protected static JComponent[] createRow(JLabel label, JComponent value) {
@@ -75,9 +74,9 @@ public abstract class InspectorPanel extends CollapsePanel {
 
     protected abstract void notifyAreaSelected(nl.tno.idsa.framework.world.Area area);
 
-    protected JList<Incident> createClickableEventList() {
-        final JList<Incident> eventList = new JList<Incident>();
-        eventList.setCellRenderer(new DefaultListCellRenderer() {
+    protected JList<Incident> createClickableIncidentList() {
+        final JList<Incident> incidentList = new JList<Incident>();
+        incidentList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 Incident incident = (Incident) value;
@@ -86,19 +85,19 @@ public abstract class InspectorPanel extends CollapsePanel {
                 return super.getListCellRendererComponent(list, descr, index, isSelected, cellHasFocus);
             }
         });
-        eventList.addMouseListener(new MouseAdapter() {
+        incidentList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() != 1) {
                     return;
                 }
-                Incident incident = eventList.getSelectedValue();
-                notifyEventSelected(incident);
+                Incident incident = incidentList.getSelectedValue();
+                notifyIncidentSelected(incident);
             }
         });
-        eventList.setBorder(new LineBorder(SystemColor.controlDkShadow, 1));
-        return eventList;
+        incidentList.setBorder(new LineBorder(SystemColor.controlDkShadow, 1));
+        return incidentList;
     }
 
-    protected abstract void notifyEventSelected(Incident incident);
+    protected abstract void notifyIncidentSelected(Incident incident);
 }

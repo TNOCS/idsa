@@ -17,7 +17,7 @@ public class SelectionObserver extends Observable {
     private Incident incident;
     private Area area;
 
-    SelectionObserver() {
+    public SelectionObserver() {
         this.agents = new ArrayList<>();
         this.incident = null;
     }
@@ -97,7 +97,7 @@ public class SelectionObserver extends Observable {
         return incident;
     }
 
-    boolean containsAgent(Agent a) {
+    public boolean containsAgent(Agent a) {
         return this.agents.contains(a);
     }
 }

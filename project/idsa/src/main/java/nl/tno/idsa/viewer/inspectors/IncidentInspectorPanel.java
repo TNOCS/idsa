@@ -16,26 +16,23 @@ import java.util.*;
 import java.util.List;
 
 /**
- * Created by jongsd on 27-10-15.
+ * Inspect a running incident.
  */
-// TODO Document class.
-public class EventInspectorPanel extends InspectorPanel implements Observer {
+public class IncidentInspectorPanel extends InspectorPanel implements Observer {
 
-    private final RunningIncidents runningIncidentsObserver;
     private final SelectionObserver selectionObserver;
 
-    private JList<Incident> eventList;
+    private JList<Incident> incidentList;
     private JList<Agent> agentList;
     private JList<String> actionList;
 
     private List<Incident> incidents;
-    private Vector<Agent> eventAgents = new Vector<>();
+    private Vector<Agent> incidentAgents = new Vector<>();
 
-    public EventInspectorPanel(RunningIncidents runningIncidentsObserver, SelectionObserver selectionObserver) {
+    public IncidentInspectorPanel(RunningIncidents runningIncidentsObserver, SelectionObserver selectionObserver) {
         super(Side.LEFT);
 
-        this.runningIncidentsObserver = runningIncidentsObserver;
-        this.runningIncidentsObserver.addObserver(this);
+        runningIncidentsObserver.addObserver(this);
 
         this.selectionObserver = selectionObserver;
         this.selectionObserver.addObserver(this);
@@ -45,13 +42,13 @@ public class EventInspectorPanel extends InspectorPanel implements Observer {
     }
 
     private void createSubComponents() {
-        JPanel main = new SimpleGridBagPanel(SimpleGridBagPanel.GRID_ROWS);
-        eventList = createClickableEventList();
-        JComponent[] eventListRow = createRow("Active incidents", eventList);
-        main.add(createRow(eventListRow));
+        JPanel main = new SimpleGridBagPanel(SimpleGridBagPanel.Orientation.ROWS);
+        incidentList = createClickableIncidentList();
+        JComponent[] incidentListRow = createRow("Active incidents", incidentList);
+        main.add(createRow(incidentListRow));
         agentList = createClickableAgentList(1);
-        agentList.setListData(eventAgents);
-        JComponent[] agentListRow = createRow("Agents involved in selected event", agentList);
+        agentList.setListData(incidentAgents);
+        JComponent[] agentListRow = createRow("Agents involved in selected incident", agentList);
         main.add(createRow(agentListRow));
         getMainPanel().add(main, BorderLayout.NORTH);
         actionList = new JList<>();
@@ -62,30 +59,30 @@ public class EventInspectorPanel extends InspectorPanel implements Observer {
 
     private void updateSubComponents() {
         if (incidents == null || incidents.size() == 0) {
-            eventList.setListData(new Incident[]{});
-            notifyEventSelected(null);
+            incidentList.setListData(new Incident[]{});
+            notifyIncidentSelected(null);
             collapse();
         } else {
-            eventList.setListData(new Vector<>(incidents));
-            notifyEventSelected(incidents.get(0));
+            incidentList.setListData(new Vector<>(incidents));
+            notifyIncidentSelected(incidents.get(0));
             expand();
         }
     }
 
     @Override
-    protected void notifyEventSelected(Incident incident) {
-        eventList.setSelectedValue(incident, true);
+    protected void notifyIncidentSelected(Incident incident) {
+        incidentList.setSelectedValue(incident, true);
         selectionObserver.setIncident(incident);
         if (incident == null) {
-            eventAgents.clear();
+            incidentAgents.clear();
             agentList.clearSelection();
             notifyAgentSelected(null);
         } else {
             Set<Agent> agentsInvolved = incident.getActionPlan().getAgentsInvolved();
-            eventAgents.clear();
-            eventAgents.addAll(agentsInvolved);
-            agentList.setListData(eventAgents);
-            notifyAgentSelected(eventAgents.get(0));
+            incidentAgents.clear();
+            incidentAgents.addAll(agentsInvolved);
+            agentList.setListData(incidentAgents);
+            notifyAgentSelected(incidentAgents.get(0));
         }
     }
 
@@ -100,7 +97,7 @@ public class EventInspectorPanel extends InspectorPanel implements Observer {
         if (agent == null) {
             actionList.setListData(new String[]{});
         } else {
-            Incident selectedIncident = eventList.getSelectedValue();
+            Incident selectedIncident = incidentList.getSelectedValue();
             if (selectedIncident != null) {
                 ActionPlan actionPlan = selectedIncident.getActionPlan();
                 List<Action> actionSequence = actionPlan.getActionSequence(agent);

@@ -6,9 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by jongsd on 3-9-15.
+ * A component to set time (hours, minutes, second).
  */
-// TODO Document class.
 public class TimeSetterPanel extends JPanel {
 
     private final JSpinner hourSpinner, minuteSpinner, secondSpinner;

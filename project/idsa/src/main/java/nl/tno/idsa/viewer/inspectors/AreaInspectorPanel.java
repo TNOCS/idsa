@@ -18,16 +18,15 @@ import java.util.Stack;
 import java.util.Vector;
 
 /**
- * Created by jongsd on 23-9-15.
+ * Inspector panel for areas in the world.
  */
-// TODO Document class.
 public class AreaInspectorPanel extends InspectorPanel implements Observer {
 
     private final SelectionObserver selectionObserver;
     private nl.tno.idsa.framework.world.Area area;
 
     private Stack<nl.tno.idsa.framework.world.Area> previousAreas = new Stack<>();
-    protected JButton btnPreviousArea;
+    private JButton btnPreviousArea;
 
     private JLabel areaType;
     private JList<LocationFunction> locationFunctionList;
@@ -66,7 +65,7 @@ public class AreaInspectorPanel extends InspectorPanel implements Observer {
     }
 
     @Override
-    protected void notifyEventSelected(Incident incident) {
+    protected void notifyIncidentSelected(Incident incident) {
         // Not happening.
     }
 
@@ -106,14 +105,14 @@ public class AreaInspectorPanel extends InspectorPanel implements Observer {
         btnPreviousArea.setFocusPainted(false);
         getToolbar().add(btnPreviousArea);
 
-        JPanel main = new SimpleGridBagPanel(SimpleGridBagPanel.GRID_ROWS);
+        JPanel main = new SimpleGridBagPanel(SimpleGridBagPanel.Orientation.ROWS);
         getMainPanel().add(main, BorderLayout.NORTH);
 
         JComponent[] nameRow = createRow("Area type", "");
         areaType = (JLabel) nameRow[1];
         main.add(createRow(nameRow));
 
-        // TODO This list could look a lot cleaner.
+        // TODO Improve. This list could look a lot cleaner.
         locationFunctionList = new JList<>();
         locationFunctionList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
@@ -152,9 +151,8 @@ public class AreaInspectorPanel extends InspectorPanel implements Observer {
             areaType.setText(area.getType());
         }
 
-        // TODO How can we implement this? Areas would need to know the environment they are in.
         if (area != null) {
-            // TODO avoid singleton access
+            // TODO Avoid Sim singleton access. Areas would need to know the environment they are in.
             java.util.Vector<Agent> agents = Sim.getInstance().getEnvironment().getAgentsIn(area);
             agentsInAreaList.setListData(agents);
         } else {

@@ -21,11 +21,11 @@ import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.framework.world.Point;
 import nl.tno.idsa.library.models.BasicMovementModel;
 import nl.tno.idsa.viewer.components.ProgressDialog;
-import nl.tno.idsa.viewer.eventsettings.IncidentParameterDialog;
-import nl.tno.idsa.viewer.eventsettings.IncidentSelectorDialog;
+import nl.tno.idsa.viewer.incidentsettings.IncidentParameterDialog;
+import nl.tno.idsa.viewer.incidentsettings.IncidentSelectorDialog;
 import nl.tno.idsa.viewer.inspectors.AgentInspectorPanel;
 import nl.tno.idsa.viewer.inspectors.AreaInspectorPanel;
-import nl.tno.idsa.viewer.inspectors.EventInspectorPanel;
+import nl.tno.idsa.viewer.inspectors.IncidentInspectorPanel;
 import nl.tno.idsa.viewer.observers.RunningIncidents;
 import nl.tno.idsa.viewer.timesettings.SeasonSettingDialog;
 import nl.tno.idsa.viewer.timesettings.TimeSettingDialog;
@@ -225,7 +225,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         createRouteButton.setFocusPainted(false);
         controlPanel.add(createRouteButton);
         bg.add(createRouteButton);
-        final JToggleButton createEventButton = new JToggleButton(new AbstractAction("Create event") {
+        final JToggleButton createEventButton = new JToggleButton(new AbstractAction("Inject incident") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (((JToggleButton) e.getSource()).isSelected()) {
@@ -265,7 +265,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         AreaInspectorPanel areaInspector = new AreaInspectorPanel(this.selectionObserver);
         inspectorPanel.add(areaInspector);
 
-        EventInspectorPanel eventInspector = new EventInspectorPanel(this.incidents, this.selectionObserver);
+        IncidentInspectorPanel eventInspector = new IncidentInspectorPanel(this.incidents, this.selectionObserver);
         contentPane.add(eventInspector, BorderLayout.WEST);
     }
 

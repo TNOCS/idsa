@@ -15,7 +15,7 @@ public class ProgressDialog extends JDialog implements IProgressObserver {
     private final JProgressBar progressBar;
 
     public ProgressDialog(JFrame owner) {
-        super(owner, "Progress");
+        super(owner, "Progress", true);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
         JPanel contentPane = new JPanel(new BorderLayout(3, 3));
