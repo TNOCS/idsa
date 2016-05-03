@@ -23,7 +23,7 @@ public class GUI {
         try {
             javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            // Yeah, this doesn't happen.
+            // Empty
         }
     }
 

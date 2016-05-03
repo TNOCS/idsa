@@ -35,8 +35,13 @@ public class ProgressDialog extends JDialog implements IProgressObserver {
     }
 
     @Override
-    public void notifyShowProgress(boolean showProgress) {
-        setVisible(showProgress);
+    public void notifyShowProgress(final boolean showProgress) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                setVisible(showProgress);
+            }
+        });
     }
 
     @Override

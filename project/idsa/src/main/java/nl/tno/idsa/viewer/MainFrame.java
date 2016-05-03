@@ -21,8 +21,6 @@ import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.framework.world.Point;
 import nl.tno.idsa.library.models.BasicMovementModel;
 import nl.tno.idsa.viewer.components.ProgressDialog;
-import nl.tno.idsa.viewer.incidentsettings.IncidentParameterDialog;
-import nl.tno.idsa.viewer.incidentsettings.IncidentSelectorDialog;
 import nl.tno.idsa.viewer.inspectors.AgentInspectorPanel;
 import nl.tno.idsa.viewer.inspectors.AreaInspectorPanel;
 import nl.tno.idsa.viewer.inspectors.IncidentInspectorPanel;
@@ -55,6 +53,8 @@ import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import nl.tno.idsa.viewer.eventsettings.IncidentParameterDialog;
+import nl.tno.idsa.viewer.eventsettings.IncidentSelectorDialog;
 
 /**
  * The main frame for the GUI application.
