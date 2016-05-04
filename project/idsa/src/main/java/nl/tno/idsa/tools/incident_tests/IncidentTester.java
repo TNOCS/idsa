@@ -1,4 +1,4 @@
-package nl.tno.idsa.tools.event_tests;
+package nl.tno.idsa.tools.incident_tests;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
 import nl.tno.idsa.framework.behavior.planners.IncidentPlanner;
@@ -14,12 +14,12 @@ import nl.tno.idsa.library.world.WorldModelNL;
 /**
  * Base class for tests of incidents. This way, incidents can be tested without the GUI.
  */
-public abstract class EventTester {
+public abstract class IncidentTester {
 
     /**
-     * Test an event.
+     * Test an incident.
      */
-    protected void testEvent() throws Exception {
+    protected void testIncident() throws Exception {
 
         // STEP 0. CREATE WORLD.
         // TODO A lot of hardcoded stuff here.
@@ -30,19 +30,19 @@ public abstract class EventTester {
         Messenger.setEnvironment(env);
         Messenger.enableMirrorToConsole(true);
 
-        // STEP 1. CREATE EVENT.
-        Incident incident = createEvent(env);
+        // STEP 1. CREATE INCIDENT.
+        Incident incident = createIncident(env);
 
         // STEP 2. QUERY AND FILL PARAMETERS.
-        System.out.println("\nCREATE EVENT PARAMETERS");
-        long desiredTime = initializeEventParameters(env, incident);
+        System.out.println("\nCREATE INCIDENT PARAMETERS");
+        long desiredTime = initializeIncidentParameters(env, incident);
         if (!incident.bindParameters()) {
-            System.out.println("Event parameters not valid.");
+            System.out.println("Incident parameters not valid.");
             return;
         }
 
         // STEP 3. CREATE A PLAN.
-        System.out.println("\nCREATE EVENT PLAN");
+        System.out.println("\nCREATE INCIDENT PLAN");
         Tuple<ActionPlan, Boolean> planTuple = IncidentPlanner.plan(env, incident);
         if (!planTuple.getSecond()) {
             System.out.println("Plan will not take until " + new Time(desiredTime) +
@@ -59,12 +59,12 @@ public abstract class EventTester {
     }
 
     /**
-     * Implementations create the event to be tested here.
+     * Implementations create the incident to be tested here.
      */
-    protected abstract Incident createEvent(Environment env) throws InstantiationException;
+    protected abstract Incident createIncident(Environment env) throws InstantiationException;
 
     /**
-     * Implementations initialize the event parameters here.
+     * Implementations initialize the incident parameters here.
      */
-    protected abstract long initializeEventParameters(Environment env, Incident incident);
+    protected abstract long initializeIncidentParameters(Environment env, Incident incident);
 }

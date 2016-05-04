@@ -1,4 +1,4 @@
-package nl.tno.idsa.tools.event_tests;
+package nl.tno.idsa.tools.incident_tests;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
@@ -11,19 +11,19 @@ import nl.tno.idsa.library.incidents.IncidentCrime;
 
 import java.util.Map;
 
-public class TestEventCrime extends EventTester {
+public class TestIncidentCrime extends IncidentTester {
 
     public static void main(String[] args) throws Exception {
-        (new TestEventCrime()).testEvent();
+        (new TestIncidentCrime()).testIncident();
     }
 
     @Override
-    protected Incident createEvent(Environment env) throws InstantiationException {
+    protected Incident createIncident(Environment env) throws InstantiationException {
         return new IncidentCrime(env.getWorld());
     }
 
     @Override
-    protected long initializeEventParameters(Environment env, Incident incident) {
+    protected long initializeIncidentParameters(Environment env, Incident incident) {
         Map<ParameterId, Variable> parameters = incident.getParameters();
         long desiredTime = env.getTime().getCopyWithDifference(0, 15, 0).getNanos();      // 15 minuten
         parameters.put(Incident.Parameters.LOCATION_VARIABLE, new LocationVariable(new LocationAndTime(new Point(1876, 2201), desiredTime)));

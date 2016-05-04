@@ -1,4 +1,4 @@
-package nl.tno.idsa.tools.event_tests;
+package nl.tno.idsa.tools.incident_tests;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
@@ -16,13 +16,13 @@ import nl.tno.idsa.library.locations.PoliceSpawnPoint;
 import java.util.List;
 import java.util.Map;
 
-public class TestEventComeToAid extends EventTester {
+public class TestIncidentComeToAid extends IncidentTester {
     public static void main(String[] args) throws Exception {
-        (new TestEventComeToAid()).testEvent();
+        (new TestIncidentComeToAid()).testIncident();
     }
 
     @Override
-    protected Incident createEvent(Environment env) throws InstantiationException {
+    protected Incident createIncident(Environment env) throws InstantiationException {
         // Add some police stations, randomly, as they are not in the world yet.
         // TODO Create police stations in the world.
         List<Vertex> vertices = env.getWorld().getVertices();
@@ -38,7 +38,7 @@ public class TestEventComeToAid extends EventTester {
     }
 
     @Override
-    protected long initializeEventParameters(Environment env, Incident incident) {
+    protected long initializeIncidentParameters(Environment env, Incident incident) {
         Map<ParameterId, Variable> parameters = incident.getParameters();
         long desiredTime = env.getTime().getCopyWithDifference(0, 30, 0).getNanos();
         parameters.put(Incident.Parameters.LOCATION_VARIABLE, new LocationVariable(new LocationAndTime(new Point(1876, 2201), desiredTime)));

@@ -19,18 +19,18 @@ import java.util.Vector;
  * Created by jongsd on 3-9-15.
  */
 // TODO Document class.
-public class EventSelectorDialog extends JDialog {
+public class IncidentSelectorDialog extends JDialog {
 
     private final World world;
 
     private Incident selectedIncident;
 
-    public EventSelectorDialog(Frame parent, World world) {
+    public IncidentSelectorDialog(Frame parent, World world) {
 
         super(parent);
         this.world = world;
 
-        setTitle("Select an event");
+        setTitle("Select an incident");
         setModal(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -45,9 +45,9 @@ public class EventSelectorDialog extends JDialog {
             return;
         }
 
-        final JList<Incident> eventList = new JList<Incident>(incidents);
-        eventList.setSelectedIndex(0);
-        eventList.setCellRenderer(new DefaultListCellRenderer() {
+        final JList<Incident> incidentList = new JList<Incident>(incidents);
+        incidentList.setSelectedIndex(0);
+        incidentList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 Incident incident = (Incident) value;
@@ -55,7 +55,7 @@ public class EventSelectorDialog extends JDialog {
                 return super.getListCellRendererComponent(list, valueStr, index, isSelected, cellHasFocus);
             }
         });
-        getContentPane().add(new JScrollPane(eventList), BorderLayout.CENTER);
+        getContentPane().add(new JScrollPane(incidentList), BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 3, 3));
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
@@ -63,7 +63,7 @@ public class EventSelectorDialog extends JDialog {
         JButton okButton = new JButton(new AbstractAction("Insert") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                selectedIncident = eventList.getSelectedValue();
+                selectedIncident = incidentList.getSelectedValue();
                 dispose();
             }
         });

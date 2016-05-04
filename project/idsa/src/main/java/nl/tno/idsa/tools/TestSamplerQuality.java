@@ -47,7 +47,7 @@ public class TestSamplerQuality {
     private static int Fails = 0;
     private static final HashMap<Incident, Long> eventToAllowedDuration = new HashMap<>();
 
-    private static final HashMap<Incident, String> eventName = new HashMap<>();
+    private static final HashMap<Incident, String> incidentName = new HashMap<>();
     private static final HashMap<Incident, Double> eventToSamplingTime = new HashMap<>();
     private static final HashMap<Incident, Boolean> eventIsSolved = new HashMap<>();
 
@@ -96,16 +96,16 @@ public class TestSamplerQuality {
         // TODO This uses a lot of hardcoding instead of enumerating and instantiating everything in the library.
         ArrayList<Incident> incidents = new ArrayList<>();
         for (int i = 0; i < numberOfEvents; i++) {
-            int whatEvent = RandomNumber.nextInt(maxEvents);
+            int whatIncident = RandomNumber.nextInt(maxEvents);
             Incident incident;
             Map<ParameterId, Variable> parameters;
 
-            if (whatEvent == 0) { //Procession
+            if (whatIncident == 0) { //Procession
                 incident = new IncidentProcession(env.getWorld());
                 parameters = incident.getParameters();
                 parameters.put(IncidentProcession.Parameters.NUMBER_OF_PARTICIPANTS, new IntegerVariable(RandomNumber.nextInt(10) + 11)); //between 10 and 20 participants.
-                eventName.put(incident, "Procession");
-            } else if (whatEvent == 1) { //Arrest
+                incidentName.put(incident, "Procession");
+            } else if (whatIncident == 1) { //Arrest
                 incident = new IncidentArrestAfterOffense(env.getWorld());
                 parameters = incident.getParameters();
                 int chooseRole = RandomNumber.nextInt(2); //2 roles for offender
@@ -121,16 +121,16 @@ public class TestSamplerQuality {
                 parameters.put(IncidentArrestAfterOffense.Parameters.DESIRED_OFFENDER_ROLE, new RoleVariable(role));
                 parameters.put(IncidentArrestAfterOffense.Parameters.NUMBER_OF_OFFENDERS, new IntegerVariable(2 + RandomNumber.nextInt(2))); //between 2 and 3
                 parameters.put(IncidentArrestAfterOffense.Parameters.NUMBER_OF_ARRESTING_OFFICERS, new IntegerVariable(2 + RandomNumber.nextInt(2))); //between 2 and 3
-                eventName.put(incident, "Arrest");
-            } else if (whatEvent == 2) { //ComeToAid
+                incidentName.put(incident, "Arrest");
+            } else if (whatIncident == 2) { //ComeToAid
                 incident = new IncidentComeToAid(env.getWorld());
                 parameters = incident.getParameters();
 
                 parameters.put(IncidentComeToAid.Parameters.NUMBER_OF_VICTIMS, new IntegerVariable(2));
                 parameters.put(IncidentComeToAid.Parameters.NUMBER_OF_FIRST_RESPONDERS, new IntegerVariable(1));
-                eventName.put(incident, "Come to aid");
+                incidentName.put(incident, "Come to aid");
             } else {
-                System.out.println("ERROR: cannot choose event " + whatEvent);
+                System.out.println("ERROR: cannot choose incident " + whatIncident);
                 incident = null;
                 parameters = null;
             }
@@ -142,7 +142,7 @@ public class TestSamplerQuality {
                 if (incident.bindParameters()) {
                     incidents.add(incident);
                 } else {
-                    System.out.println("ERROR: cannot bind parameters for event " + whatEvent);
+                    System.out.println("ERROR: cannot bind parameters for incident " + whatIncident);
                 }
             }
         }
@@ -180,11 +180,11 @@ public class TestSamplerQuality {
                 System.out.println("Current time to realize end of enabling action: " + Time.durationToString(plan.estimateDuration(env, true)));
                 System.out.println("Allowed time to realize: " + Time.durationToString(eventToAllowedDuration.get(incident)));
 
-                if (eventName.get(incident).equals("Procession")) {
+                if (incidentName.get(incident).equals("Procession")) {
                     failTimeNeededProcession.put(incident, plan.estimateDuration(env, true));
-                } else if (eventName.get(incident).equals("Arrest")) {
+                } else if (incidentName.get(incident).equals("Arrest")) {
                     failTimeNeededArrest.put(incident, plan.estimateDuration(env, true));
-                } else if (eventName.get(incident).equals("Come to aid")) {
+                } else if (incidentName.get(incident).equals("Come to aid")) {
                     failTimeNeededComeToAid.put(incident, plan.estimateDuration(env, true));
                 }
 
@@ -209,7 +209,7 @@ public class TestSamplerQuality {
         for (Incident incident : incidents) {
             double time = eventToSamplingTime.get(incident);
             timesTotal.add(time);
-            if (eventName.get(incident).equals("Procession")) {
+            if (incidentName.get(incident).equals("Procession")) {
                 timesProcession.add(time);
                 if (eventIsSolved.get(incident)) {
                     timesProcessionSuccess.add(time);
@@ -218,7 +218,7 @@ public class TestSamplerQuality {
                     timesProcessionFail.add(time);
                     timesTotalFail.add(time);
                 }
-            } else if (eventName.get(incident).equals("Arrest")) {
+            } else if (incidentName.get(incident).equals("Arrest")) {
                 timesArrest.add(time);
                 if (eventIsSolved.get(incident)) {
                     timesArrestSuccess.add(time);
@@ -227,7 +227,7 @@ public class TestSamplerQuality {
                     timesArrestFail.add(time);
                     timesTotalFail.add(time);
                 }
-            } else if (eventName.get(incident).equals("Come to aid")) {
+            } else if (incidentName.get(incident).equals("Come to aid")) {
                 timesComeToAid.add(time);
                 if (eventIsSolved.get(incident)) {
                     timesComeToAidSuccess.add(time);

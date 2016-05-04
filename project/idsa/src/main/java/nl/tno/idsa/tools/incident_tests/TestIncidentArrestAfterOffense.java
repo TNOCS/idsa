@@ -1,4 +1,4 @@
-package nl.tno.idsa.tools.event_tests;
+package nl.tno.idsa.tools.incident_tests;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
@@ -16,13 +16,13 @@ import nl.tno.idsa.library.locations.PoliceSpawnPoint;
 import java.util.List;
 import java.util.Map;
 
-public class TestEventArrestAfterOffense extends EventTester {
+public class TestIncidentArrestAfterOffense extends IncidentTester {
     public static void main(String[] args) throws Exception {
-        (new TestEventArrestAfterOffense()).testEvent();
+        (new TestIncidentArrestAfterOffense()).testIncident();
     }
 
     @Override
-    protected Incident createEvent(Environment env) throws InstantiationException {
+    protected Incident createIncident(Environment env) throws InstantiationException {
         List<Vertex> vertices = env.getWorld().getVertices();
         int changedVertices = 0;
         while (changedVertices < 50) {
@@ -36,7 +36,7 @@ public class TestEventArrestAfterOffense extends EventTester {
     }
 
     @Override
-    protected long initializeEventParameters(Environment env, Incident incident) {
+    protected long initializeIncidentParameters(Environment env, Incident incident) {
         Map<ParameterId, Variable> parameters = incident.getParameters();
         parameters.put(IncidentArrestAfterOffense.Parameters.NUMBER_OF_OFFENDERS, new IntegerVariable(2));
         parameters.put(IncidentArrestAfterOffense.Parameters.NUMBER_OF_ARRESTING_OFFICERS, new IntegerVariable(2));

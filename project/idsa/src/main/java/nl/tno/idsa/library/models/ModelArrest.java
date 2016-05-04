@@ -18,7 +18,7 @@ public class ModelArrest extends SynchronousSingleStepModel {
     @Override
     public boolean doSingleStep() {
 
-        // Make sure the police officers are removed after the event is done (pushed below any move models that come after).
+        // Make sure the police officers are removed after the incident is done (pushed below any move models that come after).
         ModelDisappear modelDisappear = new ModelDisappear();
         modelDisappear.setEnvironment(getEnvironment());
         modelDisappear.setActors(getActors());

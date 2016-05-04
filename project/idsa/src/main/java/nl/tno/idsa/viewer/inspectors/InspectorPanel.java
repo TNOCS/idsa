@@ -26,11 +26,11 @@ public abstract class InspectorPanel extends CollapsePanel {
         JLabel vLabel = new JLabel(value);
         vLabel.setHorizontalAlignment(SwingConstants.LEFT);
         vLabel.setVerticalAlignment(SwingConstants.TOP);
-        return EventInspectorPanel.createRow(new JLabel(label), vLabel);
+        return IncidentInspectorPanel.createRow(new JLabel(label), vLabel);
     }
 
     protected static JComponent[] createRow(String label, JComponent value) {
-        return EventInspectorPanel.createRow(new JLabel(label), value);
+        return IncidentInspectorPanel.createRow(new JLabel(label), value);
     }
 
     protected static JComponent[] createRow(JLabel label, JComponent value) {

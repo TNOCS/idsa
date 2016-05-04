@@ -1,4 +1,4 @@
-package nl.tno.idsa.tools.event_tests;
+package nl.tno.idsa.tools.incident_tests;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
@@ -12,19 +12,19 @@ import nl.tno.idsa.library.incidents.IncidentProcession;
 
 import java.util.Map;
 
-public class TestEventProcession extends EventTester {
+public class TestIncidentProcession extends IncidentTester {
 
     public static void main(String[] args) throws Exception {
-        (new TestEventProcession()).testEvent();
+        (new TestIncidentProcession()).testIncident();
     }
 
     @Override
-    protected Incident createEvent(Environment env) throws InstantiationException {
+    protected Incident createIncident(Environment env) throws InstantiationException {
         return new IncidentProcession(env.getWorld());
     }
 
     @Override
-    protected long initializeEventParameters(Environment env, Incident incident) {
+    protected long initializeIncidentParameters(Environment env, Incident incident) {
         Map<ParameterId, Variable> parameters = incident.getParameters();
         parameters.put(IncidentProcession.Parameters.NUMBER_OF_PARTICIPANTS, new IntegerVariable(5));
         long desiredTime = env.getTime().getCopyWithDifference(0, 15, 0).getNanos();      // 15 minuten

@@ -21,12 +21,12 @@ import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.framework.world.Point;
 import nl.tno.idsa.library.models.BasicMovementModel;
 import nl.tno.idsa.viewer.components.ProgressDialog;
-import nl.tno.idsa.viewer.eventsettings.EventParameterDialog;
-import nl.tno.idsa.viewer.eventsettings.EventSelectorDialog;
+import nl.tno.idsa.viewer.eventsettings.IncidentParameterDialog;
+import nl.tno.idsa.viewer.eventsettings.IncidentSelectorDialog;
 import nl.tno.idsa.viewer.inspectors.AgentInspectorPanel;
 import nl.tno.idsa.viewer.inspectors.AreaInspectorPanel;
-import nl.tno.idsa.viewer.inspectors.EventInspectorPanel;
-import nl.tno.idsa.viewer.observers.RunningEvents;
+import nl.tno.idsa.viewer.inspectors.IncidentInspectorPanel;
+import nl.tno.idsa.viewer.observers.RunningIncidentsObserver;
 import nl.tno.idsa.viewer.timesettings.SeasonSettingDialog;
 import nl.tno.idsa.viewer.timesettings.TimeSettingDialog;
 import nl.tno.idsa.viewer.utils.AgentColorUtil;
@@ -76,7 +76,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
     private final javax.swing.JPanel contentPane;
 
     private final SelectionObserver selectionObserver;
-    private final RunningEvents events;
+    private final RunningIncidentsObserver incidents;
 
     private final PCanvas canvas;
     private final PLayer uiLayer;
@@ -96,9 +96,9 @@ public class MainFrame implements IEnvironmentObserver, Observer {
 
     public MainFrame(Environment env) {
         this.env = env;
-        // Shared agent/event selection
+        // Shared agent/incident selection
         this.selectionObserver = new SelectionObserver();
-        this.events = new RunningEvents();
+        this.incidents = new RunningIncidentsObserver();
 
         Sim.getInstance().setPause(true);
         Sim.getInstance().init(env);
@@ -228,7 +228,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         createRouteButton.setFocusPainted(false);
         controlPanel.add(createRouteButton);
         bg.add(createRouteButton);
-        final JToggleButton createEventButton = new JToggleButton(new AbstractAction("Create event") {
+        final JToggleButton createIncidentButton = new JToggleButton(new AbstractAction("Inject incident") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (((JToggleButton) e.getSource()).isSelected()) {
@@ -238,9 +238,9 @@ public class MainFrame implements IEnvironmentObserver, Observer {
                 }
             }
         });
-        createEventButton.setFocusPainted(false);
-        controlPanel.add(createEventButton);
-        bg.add(createEventButton);
+        createIncidentButton.setFocusPainted(false);
+        controlPanel.add(createIncidentButton);
+        bg.add(createIncidentButton);
 
         javax.swing.JPanel controlPanelP = new javax.swing.JPanel(new BorderLayout(3, 3));
         controlPanelP.add(controlPanel, BorderLayout.WEST);
@@ -268,7 +268,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         AreaInspectorPanel areaInspector = new AreaInspectorPanel(this.selectionObserver);
         inspectorPanel.add(areaInspector);
 
-        EventInspectorPanel eventInspector = new EventInspectorPanel(this.events, this.selectionObserver);
+        IncidentInspectorPanel eventInspector = new IncidentInspectorPanel(this.incidents, this.selectionObserver);
         contentPane.add(eventInspector, BorderLayout.WEST);
     }
 
@@ -328,11 +328,11 @@ public class MainFrame implements IEnvironmentObserver, Observer {
             Thread.sleep(100);
         }
 
-        // Create event dialog.
+        // Create incident dialog.
         Environment environment = Sim.getInstance().getEnvironment();
-        EventSelectorDialog eventSelectorDialog = new EventSelectorDialog(mapFrame, environment.getWorld());
-        eventSelectorDialog.setVisible(true);
-        Incident incident = eventSelectorDialog.getSelectedIncident();
+        IncidentSelectorDialog incidentSelectorDialog = new IncidentSelectorDialog(mapFrame, environment.getWorld());
+        incidentSelectorDialog.setVisible(true);
+        Incident incident = incidentSelectorDialog.getSelectedIncident();
         if (incident == null) {
             Sim.getInstance().setPause(false);
             return;
@@ -341,17 +341,17 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         // Create event parameters.
         LocationVariable locationVariable = (LocationVariable) incident.getParameters().get(Incident.Parameters.LOCATION_VARIABLE);
         locationVariable.setValue(new LocationAndTime(location));
-        EventParameterDialog eventParameterDialog = new EventParameterDialog(mapFrame, incident, environment);
-        eventParameterDialog.setVisible(true);
-        incident = eventParameterDialog.getSelectedIncident();
-        if (incident == null) { //todo: this does not handle a cancelled event correctly (nullpointer exception when closing the eventParameterDialog).
+        IncidentParameterDialog incidentParameterDialog = new IncidentParameterDialog(mapFrame, incident, environment);
+        incidentParameterDialog.setVisible(true);
+        incident = incidentParameterDialog.getSelectedIncident();
+        if (incident == null) { //todo: this does not handle a cancelled incident correctly (nullpointer exception when closing the dialog).
             Sim.getInstance().setPause(false);
             return;
         }
 
         // Create a plan.
         ProgressNotifier.notifyShowProgress(true);
-        ProgressNotifier.notifyProgressMessage("Planning event...");
+        ProgressNotifier.notifyProgressMessage("Planning incident...");
 
         long desiredEndTime = incident.getEnablingAction().getLocationVariable().getValue().getTimeNanos();
         Tuple<ActionPlan, Boolean> planTuple = IncidentPlanner.plan(env, incident);
@@ -361,13 +361,13 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         ProgressNotifier.notifyShowProgress(false);
 
         if (isValid) {
-            startEvent(incident, plan);
+            startIncident(incident, plan);
         } else {
             long achievedEndTime = plan.getGoalAction().getLocationVariable().getValue().getTimeNanos();
             int choice = javax.swing.JOptionPane.showConfirmDialog(
                     null,
-                    String.format("It seems %s is too soon to be able to realize this event.\nCan it occur at %s instead?", new Time(desiredEndTime), new Time(achievedEndTime)),
-                    "Event happens too soon", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.QUESTION_MESSAGE);
+                    String.format("It seems %s is too soon to be able to realize this incident.\nCan it occur at %s instead?", new Time(desiredEndTime), new Time(achievedEndTime)),
+                    "Incident happens too soon", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.QUESTION_MESSAGE);
 
             // The user wants it when s/he says it and not later...
             if (choice == javax.swing.JOptionPane.NO_OPTION) {
@@ -378,7 +378,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
             else {
                 // TODO This sometimes seems to yield plans with a negative time for certain steps.
                 plan.startModels(environment);
-                startEvent(incident, plan);
+                startIncident(incident, plan);
             }
         }
 
@@ -386,12 +386,12 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         Sim.getInstance().setPause(false);
     }
 
-    private void startEvent(final Incident incident, final ActionPlan plan) {
+    private void startIncident(final Incident incident, final ActionPlan plan) {
 
-        events.addEvent(incident);
+        incidents.addIncident(incident);
         visualizePlan(plan);
 
-        // Make sure the event becomes deactivated. TODO Note that this only works if incidents always finish exactly when they have to.
+        // Make sure the incident becomes deactivated. TODO Note that this only works if incidents always finish exactly when they have to.
         new Thread() {
             @Override
             public void run() {
@@ -405,7 +405,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
                         break;
                     }
                 }
-                events.removeEvent(incident);
+                incidents.removeIncident(incident);
             }
         }.start();
     }

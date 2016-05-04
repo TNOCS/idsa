@@ -18,27 +18,27 @@ import java.util.Map;
  * Created by jongsd on 3-9-15.
  */
 // TODO Document class.
-public class EventParameterDialog extends JDialog {
+public class IncidentParameterDialog extends JDialog {
 
     // TODO Add functionality (complex) that allows specifying the parameters of actions ...
-    // when the event's enabling action is abstract. Example: "Road block" is enabled by RoadBlock, and Arrest
+    // when the incident's enabling action is abstract. Example: "Road block" is enabled by RoadBlock, and Arrest
     // implements RoadBlock. Now, the user can only see a default arrest. In order to specify the number of offenders
     // and arresting officers, the user must place an event "Arrest". The complexity is that parameters are specified
-    // via incidents (EventArrest) instead of actions, while action hierarchy is an action concept. In other words, for
-    // this to work, we must find an event that has Arrest as the enabling action and plan this event instead of
+    // via incidents (IncidentArrest) instead of actions, while action hierarchy is an action concept. In other words, for
+    // this to work, we must find an incident that has Arrest as the enabling action and plan this incident instead of
     // "Road block". This sounds like a 'cheating' way around a clear design choice.
 
-    private EventParameterDialog me = this;
+    private IncidentParameterDialog me = this;
     private Incident selectedIncident;
     private Map<Variable, EventParameterRendererComponent> componentMap = new HashMap<>();
 
-    public EventParameterDialog(final Frame parent, final Incident incident, final Environment environment) {
+    public IncidentParameterDialog(final Frame parent, final Incident incident, final Environment environment) {
 
         super(parent);
 
         selectedIncident = incident;
 
-        setTitle("Set event parameters");
+        setTitle("Set incident parameters");
         setModal(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -72,7 +72,7 @@ public class EventParameterDialog extends JDialog {
             }
         }
 
-        labelPanel.add(new JLabel("Time of event"));
+        labelPanel.add(new JLabel("Time of incident"));
         final TimeSetterPanel timeSetterPanel = new TimeSetterPanel(environment.getTime().incrementByMinutes(10)); // TODO Set some default in a different way than using a magic constant.
         promptPanel.add(timeSetterPanel);
 
@@ -95,7 +95,7 @@ public class EventParameterDialog extends JDialog {
 
                 // Test whether the plan is feasible (time > 0).
                 if (lv.getValue().getTimeNanos() <= environment.getTime().getNanos()) {
-                    JOptionPane.showMessageDialog(null, String.format("The event %s should take place in the future.", incident));
+                    JOptionPane.showMessageDialog(null, String.format("The incident %s should take place in the future.", incident));
                     return;
                 }
 

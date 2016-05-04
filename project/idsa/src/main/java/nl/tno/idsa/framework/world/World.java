@@ -426,7 +426,7 @@ public class World {
             }
             // Linear search if maximum number of samples reached
             if (!found) {
-                //System.out.println("Starting linear search sampling for a location. The event is difficult to realize."); //todo: decide on printing this. Logger/refine print?.
+                //System.out.println("Starting linear search sampling for a location. The incident is difficult to realize."); //todo: decide on printing this. Logger/refine print?.
                 for (int j = 0; !found && j < candidates.size(); ++j) {
                     double distance = candidates.get(j).euclideanDistanceTo(target);
                     if (distance < originalDistance) {
