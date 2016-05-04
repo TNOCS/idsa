@@ -14,37 +14,27 @@ import nl.tno.idsa.viewer.components.ProgressDialog;
 
 import java.util.List;
 
-/**
- * Main entry point for the GUI application.
- */
+// TODO Document class. Mark it as the main class.
 public class GUI {
 
-    static {
-        try {
-            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            // Empty
-        }
-    }
+    private static final boolean makeAgendas = true; // TODO This is a setting.
 
     public static void main(String[] args) throws Exception {
 
         ProgressDialog progressDialog = new ProgressDialog(null);
         ProgressNotifier.addObserver(progressDialog);
 
-        Messenger.enableMirrorToConsole(true);
-        // TODO Feature: catch console messages in a graphical element.
+        Messenger.enableMirrorToConsole(true); // TODO Catch console messages in a graphical element.
 
         ProgressNotifier.notifyShowProgress(true);
         ProgressNotifier.notifyProgressMessage("Loading world data...");
 
-        World world = WorldGenerator.generateWorld(new WorldModelNL(), "../../data/nl/idsa_nav_network_pedestrian.shp", "../../data/nl/idsa_pand_osm_a_utm31n.shp", "../../data/nl/idsa_public_areas_a_utm31n.shp", "../../data/nl/idsa_vbo_utm31n.shp", "../../data/nl/idsa_pand_p_utm31n.shp");
+        World world = WorldGenerator.generateWorld(new WorldModelNL(), "../../data/idsa_nav_network_pedestrian.shp", "../../data/idsa_pand_osm_a_utm31n.shp", "../../data/idsa_public_areas_a_utm31n.shp", "../../data/idsa_vbo_utm31n.shp", "../../data/idsa_pand_p_utm31n.shp");
 
         ProgressNotifier.notifyProgressMessage("Creating environment...");
 
-        // TODO Feature: show a dialog for time and day.
+        // TODO Show a dialog for time and day.
         Environment env;
-
         // Sunday 11:00 Summer
         // env = new Environment(world, new Summer(), null, new Day(14, 6, 2015), new Time(11, 0, 0));
         // Sunday 11:00 Winter
@@ -60,12 +50,12 @@ public class GUI {
 
         PopulationGenerator populationGenerator = new PopulationGenerator(env, new PopulationDataNL());
         ProgressNotifier.notifyProgress(15);
-        env.setPopulation(populationGenerator.generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp")); // TODO Improvement: remove hardcoded input shape file.
+        env.setPopulation(populationGenerator.generatePopulation("../../data/idsa_cbs_buurten_utm31n.shp")); // TODO Hardcoded input file.
         ProgressNotifier.notifyProgress(85);
-        env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), true); // True -> always make agendas.
+        env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), makeAgendas);
 
         // Add some police stations, randomly, as they are not in the world yet.
-        // TODO Improvement: create police stations in the data instead of in the code.
+        // TODO Create police stations in the world.
         System.out.println("Enriching environment...");
         List<Vertex> vertices = world.getVertices();
         int changedVertices = 0;

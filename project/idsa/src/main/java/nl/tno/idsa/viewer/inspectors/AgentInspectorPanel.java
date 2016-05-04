@@ -17,15 +17,16 @@ import java.util.Stack;
 import java.util.Vector;
 
 /**
- * Inspect agents graphically.
+ * Created by jongsd on 23-9-15.
  */
+// TODO Document class.
 public class AgentInspectorPanel extends InspectorPanel implements Observer {
 
     private final SelectionObserver selectionObserver;
     private Agent agent;
 
     private Stack<Agent> previousAgents = new Stack<>();
-    private JButton btnPreviousAgent;
+    protected JButton btnPreviousAgent;
 
     private JLabel nameLabel;
     private JLabel genderLabel;
@@ -73,7 +74,7 @@ public class AgentInspectorPanel extends InspectorPanel implements Observer {
     }
 
     @Override
-    protected void notifyIncidentSelected(Incident incident) {
+    protected void notifyEventSelected(Incident incident) {
         // Not happening.
     }
 
@@ -112,7 +113,7 @@ public class AgentInspectorPanel extends InspectorPanel implements Observer {
         btnPreviousAgent.setFocusPainted(false);
         getToolbar().add(btnPreviousAgent);
 
-        JPanel main = new SimpleGridBagPanel(SimpleGridBagPanel.Orientation.ROWS);
+        JPanel main = new SimpleGridBagPanel(SimpleGridBagPanel.GRID_ROWS);
         getMainPanel().add(main, BorderLayout.NORTH);
 
         JComponent[] nameRow = createRow("Name", "");

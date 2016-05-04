@@ -7,15 +7,24 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * Simple progress dialog.
+ * Created by jongsd on 30-10-15.
  */
+// TODO Document class.
 public class ProgressDialog extends JDialog implements IProgressObserver {
+
+    // One often sees this dialog before anything else.
+    static {
+        try {
+            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+        }
+    }
 
     private final JLabel status;
     private final JProgressBar progressBar;
 
     public ProgressDialog(JFrame owner) {
-        super(owner, "Progress", true);
+        super(owner, "Progress");
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
         JPanel contentPane = new JPanel(new BorderLayout(3, 3));
@@ -35,13 +44,8 @@ public class ProgressDialog extends JDialog implements IProgressObserver {
     }
 
     @Override
-    public void notifyShowProgress(final boolean showProgress) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                setVisible(showProgress);
-            }
-        });
+    public void notifyShowProgress(boolean showProgress) {
+        setVisible(showProgress);
     }
 
     @Override

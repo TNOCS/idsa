@@ -1,10 +1,10 @@
 package nl.tno.idsa.tools;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.planners.IncidentActionPlanner;
+import nl.tno.idsa.framework.behavior.planners.IncidentAgentAndLocationSampler;
+import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.messaging.Messenger;
-import nl.tno.idsa.framework.planners.ActionPlan;
-import nl.tno.idsa.framework.planners.ActionPlanner;
-import nl.tno.idsa.framework.planners.AgentAndLocationSampler;
 import nl.tno.idsa.framework.population.PopulationGenerator;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
 import nl.tno.idsa.framework.semantics_impl.locations.LocationAndTime;
@@ -160,11 +160,11 @@ public class TestSamplerQuality {
 
         for (Incident incident : incidents) {
             //Create a plan.
-            ActionPlan plan = ActionPlanner.getInstance().createPlan(env, incident);
+            ActionPlan plan = IncidentActionPlanner.getInstance().createPlan(env, incident);
 
             //Find suitable values for variables in the world.
             time1 = System.nanoTime();
-            boolean planFound = AgentAndLocationSampler.instantiatePlan(env, plan);
+            boolean planFound = IncidentAgentAndLocationSampler.instantiatePlan(env, plan);
             time2 = System.nanoTime();
             eventToSamplingTime.put(incident, (((double) time2 - time1)) / ((double) Time.NANO_SECOND));
             if (planFound) {

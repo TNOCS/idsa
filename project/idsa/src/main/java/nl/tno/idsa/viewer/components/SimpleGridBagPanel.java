@@ -10,6 +10,8 @@ import java.awt.*;
  * The added components will be sized in width (one row) or height (one
  * column) automatically when added. Optionally you can specify that the
  * last component in a row or column should be stretched to fill the container.
+ *
+ * @author Steven de Jong, steven.dejong@tno.nl
  */
 public class SimpleGridBagPanel extends JPanel {
     private JPanel gridbags;
@@ -18,8 +20,16 @@ public class SimpleGridBagPanel extends JPanel {
     private GridBagLayout grid;
     private GridBagConstraints c;
 
-    /** The orientation to use: in rows or in columns. */
-    public enum Orientation { ROWS, COLUMNS }
+    /**
+     * Use a row layout.
+     * TODO Replace by an enum.
+     */
+    public static final int GRID_ROWS = 0;
+
+    /**
+     * Use a column layout.
+     */
+    public static final int GRID_COLUMNS = 1;
 
     private boolean allowAddLast;
 
@@ -27,13 +37,13 @@ public class SimpleGridBagPanel extends JPanel {
      * Construct a panel with GRID_ROWS orientation.
      */
     public SimpleGridBagPanel() {
-        this(Orientation.ROWS);
+        this(0);
     }
 
     /**
      * Construct a panel with given orientation (GRID_ROWS or GRID_COLUMNS).
      */
-    public SimpleGridBagPanel(Orientation orientation) {
+    public SimpleGridBagPanel(int orientation) {
         this(orientation, false);
     }
 
@@ -41,7 +51,7 @@ public class SimpleGridBagPanel extends JPanel {
      * Construct a panel with given orientation and optionally stretch
      * the last component to fill the row or column completely.
      */
-    public SimpleGridBagPanel(Orientation orientation, boolean fill) {
+    public SimpleGridBagPanel(int orientation, boolean fill) {
         super();
 
         allowAddLast = fill;
@@ -49,7 +59,7 @@ public class SimpleGridBagPanel extends JPanel {
         grid = new GridBagLayout();
         c = new GridBagConstraints();
 
-        if (orientation == Orientation.ROWS) {
+        if (orientation == GRID_ROWS) {
             c.fill = GridBagConstraints.HORIZONTAL;
             c.gridwidth = GridBagConstraints.REMAINDER;
             c.weightx = 1.0;
@@ -63,7 +73,7 @@ public class SimpleGridBagPanel extends JPanel {
             setLayout(new BorderLayout());
 
             gridbags = new JPanel(grid);
-            add(gridbags, (orientation == Orientation.ROWS) ? BorderLayout.NORTH
+            add(gridbags, (orientation == GRID_ROWS) ? BorderLayout.NORTH
                     : BorderLayout.WEST);
 
             bottom = new JPanel(new GridLayout(1, 1, 0, 0));

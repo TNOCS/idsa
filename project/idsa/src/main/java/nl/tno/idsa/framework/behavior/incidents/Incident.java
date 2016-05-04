@@ -1,6 +1,6 @@
 package nl.tno.idsa.framework.behavior.incidents;
 
-import nl.tno.idsa.framework.planners.ActionPlan;
+import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.semantics_base.SemanticLibrary;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
 import nl.tno.idsa.framework.semantics_base.objects.ParametrizedObject;

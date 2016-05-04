@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.Observable;
 
 /**
- * Observer for selecting objects in the GUI.
+ * @author smelikrm
  */
+// TODO Document class.
 public class SelectionObserver extends Observable {
 
     private final List<Agent> agents;
@@ -18,20 +19,20 @@ public class SelectionObserver extends Observable {
     private Area area;
 
     public SelectionObserver() {
-        this.agents = new ArrayList<>();
+        this.agents = new ArrayList<Agent>();
         this.incident = null;
     }
 
     public void setIncident(Incident e) {
-        boolean incidentChanged = e == null ? this.incident != null : !e.equals(this.incident);
-        if (incidentChanged) {
+        boolean eventChanged = e == null ? this.incident != null : !e.equals(this.incident);
+        if (eventChanged) {
             setChanged();
             this.incident = e;
             notifyObservers(this.incident);
         }
         boolean agentsChanged = false;
         if (agents.size() > 0) {
-            this.agents.clear(); // When you select an incident, this means you deselect all agents.
+            this.agents.clear(); // When you select an event, this means you deselect all agents
             agentsChanged = true;
         }
         if (agentsChanged) {
@@ -50,6 +51,15 @@ public class SelectionObserver extends Observable {
         this.agents.clear();
         if (a != null) {
             this.agents.add(a);
+//            // TODO REMOVE
+//            System.out.println("AGENT @ " + a.getLocation() + " CURRENT MODEL: ");
+//            Model currentModel = a.getCurrentModel();
+//            if (currentModel != null) {
+//                Group actors = currentModel.getActors();
+//                Group targets = currentModel.getTargets();
+//                LocationAndTime locationAndEndTime = currentModel.getLocationAndEndTime();
+//                System.out.println(currentModel + " Actors:" + actors + " Targets:" + targets + " Location/time:" + locationAndEndTime);
+//            }
         }
 
         setChanged();
@@ -98,6 +108,6 @@ public class SelectionObserver extends Observable {
     }
 
     public boolean containsAgent(Agent a) {
-        return this.agents.contains(a);
+        return this.agents == null ? false : this.agents.contains(a);
     }
 }

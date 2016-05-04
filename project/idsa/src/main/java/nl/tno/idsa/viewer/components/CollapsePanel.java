@@ -10,8 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Simple panel that can collapse and expand.
+ * Created by jongsd on 27-10-15.
  */
+// TODO Document class.
 public class CollapsePanel extends JPanel {
 
     private static HashMap<Side, java.util.List<CollapsePanel>> panelsOnSameSide = new HashMap<>(); // All collapse and expand at the same time.
@@ -24,7 +25,7 @@ public class CollapsePanel extends JPanel {
     private JPanel toolbar;
     private JPanel mainPanel;
 
-    public enum Side {
+    public static enum Side {
 
         LEFT(">>", "<<", true), RIGHT("<<", ">>", true), TOP("\\/", "/\\", false), BOTTOM("/\\", "\\/", false);
 
@@ -53,6 +54,7 @@ public class CollapsePanel extends JPanel {
         setLayout(new BorderLayout(0, 0));
         setBorder(new LineBorder(SystemColor.controlDkShadow, 1));
 
+        final CollapsePanel me = this;
         btnCollapse = new JButton(new AbstractAction(side.expandedCaption) {
             @Override
             public void actionPerformed(ActionEvent e) {

@@ -2,11 +2,11 @@ package nl.tno.idsa.viewer;
 
 import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.planners.IncidentPlanner;
+import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.behavior.triggers.StaticAreaTrigger;
 import nl.tno.idsa.framework.messaging.Messenger;
 import nl.tno.idsa.framework.messaging.ProgressNotifier;
-import nl.tno.idsa.framework.planners.ActionPlan;
-import nl.tno.idsa.framework.planners.IncidentPlanner;
 import nl.tno.idsa.framework.semantics_impl.actions.Action;
 import nl.tno.idsa.framework.semantics_impl.groups.Group;
 import nl.tno.idsa.framework.semantics_impl.locations.LocationAndTime;
@@ -21,10 +21,12 @@ import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.framework.world.Point;
 import nl.tno.idsa.library.models.BasicMovementModel;
 import nl.tno.idsa.viewer.components.ProgressDialog;
+import nl.tno.idsa.viewer.eventsettings.EventParameterDialog;
+import nl.tno.idsa.viewer.eventsettings.EventSelectorDialog;
 import nl.tno.idsa.viewer.inspectors.AgentInspectorPanel;
 import nl.tno.idsa.viewer.inspectors.AreaInspectorPanel;
-import nl.tno.idsa.viewer.inspectors.IncidentInspectorPanel;
-import nl.tno.idsa.viewer.observers.RunningIncidents;
+import nl.tno.idsa.viewer.inspectors.EventInspectorPanel;
+import nl.tno.idsa.viewer.observers.RunningEvents;
 import nl.tno.idsa.viewer.timesettings.SeasonSettingDialog;
 import nl.tno.idsa.viewer.timesettings.TimeSettingDialog;
 import nl.tno.idsa.viewer.utils.AgentColorUtil;
@@ -53,22 +55,28 @@ import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import nl.tno.idsa.viewer.eventsettings.IncidentParameterDialog;
-import nl.tno.idsa.viewer.eventsettings.IncidentSelectorDialog;
 
 /**
- * The main frame for the GUI application.
+ * @author smelikrm
  */
+// TODO Document class.
 public class MainFrame implements IEnvironmentObserver, Observer {
 
-    private static final boolean DECLUTTER_AGENTS = false; // TODO Improvement: make this a global setting. Editable via GUI.
-    private static final double AGENT_ICON_SIZE = 4.0;     // TODO Improvement: make this a global setting. Editable via GUI.
+    public static final boolean DECLUTTER_AGENTS = false;
+    private static final double AGENT_ICON_SIZE = 4.0;
+
+    static {
+        try {
+            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+        }
+    }
 
     private final javax.swing.JFrame mapFrame;
     private final javax.swing.JPanel contentPane;
 
     private final SelectionObserver selectionObserver;
-    private final RunningIncidents incidents;
+    private final RunningEvents events;
 
     private final PCanvas canvas;
     private final PLayer uiLayer;
@@ -82,28 +90,25 @@ public class MainFrame implements IEnvironmentObserver, Observer {
     private static final String NODE_TYPE_AGENT = "agent";
     private static final String NODE_TYPE_STATIC_TRIGGER = "static_trigger";
 
-    private enum Mode {INSPECT_AGENT, TEST_ROUTE, INSPECT_AREA, PLACE_EVENT}
+    private static enum Mode {INSPECT_AGENT, TEST_ROUTE, INSPECT_AREA, PLACE_EVENT}
 
     private Mode mode;
 
-    private long lastRefreshTimeMs = 0;
-
     public MainFrame(Environment env) {
         this.env = env;
-
-        // Shared agent/incident selection
+        // Shared agent/event selection
         this.selectionObserver = new SelectionObserver();
-        this.incidents = new RunningIncidents();
+        this.events = new RunningEvents();
 
         Sim.getInstance().setPause(true);
         Sim.getInstance().init(env);
 
-        this.mapFrame = new javax.swing.JFrame("Daily Behaviour and Run-time Incidents Demonstrator");
+        this.mapFrame = new javax.swing.JFrame("Intent Driven Scenario Authoring");
         this.contentPane = new javax.swing.JPanel(new BorderLayout());
+
         mapFrame.setContentPane(contentPane);
 
         this.canvas = new PCanvas();
-
         // Create layers
         this.areaLayer = new PLayer();
         this.edgeLayer = new PLayer();
@@ -133,7 +138,6 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         mapFrame.setLocationRelativeTo(null);
         mapFrame.setVisible(true);
         mapFrame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
-
         // Register observers
         env.addObserver(this);
         this.selectionObserver.addObserver(this);
@@ -161,8 +165,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         setSeasonButton.setFocusPainted(false);
         setSeasonButton.setEnabled(false);
 
-        // TODO Improvement: the sim starts running automatically. Once it doesn't, label this the play button and enable the time and season buttons.
-        javax.swing.JToggleButton playPauseButton = new javax.swing.JToggleButton(new AbstractAction("Pause") {
+        javax.swing.JToggleButton playPauseButton = new javax.swing.JToggleButton(new AbstractAction("Pause") {    // TODO The sim starts running automatically. Once it doesn't, call this the play button and enable the time and season buttons.
             @Override
             public void actionPerformed(ActionEvent e) {
                 Sim.getInstance().togglePause();
@@ -225,7 +228,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         createRouteButton.setFocusPainted(false);
         controlPanel.add(createRouteButton);
         bg.add(createRouteButton);
-        final JToggleButton createEventButton = new JToggleButton(new AbstractAction("Inject incident") {
+        final JToggleButton createEventButton = new JToggleButton(new AbstractAction("Create event") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (((JToggleButton) e.getSource()).isSelected()) {
@@ -265,7 +268,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         AreaInspectorPanel areaInspector = new AreaInspectorPanel(this.selectionObserver);
         inspectorPanel.add(areaInspector);
 
-        IncidentInspectorPanel eventInspector = new IncidentInspectorPanel(this.incidents, this.selectionObserver);
+        EventInspectorPanel eventInspector = new EventInspectorPanel(this.events, this.selectionObserver);
         contentPane.add(eventInspector, BorderLayout.WEST);
     }
 
@@ -311,45 +314,44 @@ public class MainFrame implements IEnvironmentObserver, Observer {
 
     public void show() {
         mapFrame.setVisible(true);
-
-        // Display map in full.
+        // Display map in full
         canvas.getCamera().animateViewToCenterBounds(agentLayer.getFullBounds(), true, 0);
     }
 
-    private void injectIncident(Point location) throws Exception {
+    public void addEvent(Point location) throws Exception {
 
-        // Pause simulation.
+        // Pause simulation
         Sim.getInstance().setPause(true);
 
-        // Make sure sim is paused (all updates are complete and agents are standing still).
+        // Make sure sim is pause (all updates are complete and agents are standing still)
         while (!Sim.getInstance().isPaused()) {
             Thread.sleep(100);
         }
 
-        // Create incident dialog.
+        // Create event dialog.
         Environment environment = Sim.getInstance().getEnvironment();
-        IncidentSelectorDialog incidentSelectorDialog = new IncidentSelectorDialog(mapFrame, environment.getWorld());
-        incidentSelectorDialog.setVisible(true);
-        Incident incident = incidentSelectorDialog.getSelectedIncident();
+        EventSelectorDialog eventSelectorDialog = new EventSelectorDialog(mapFrame, environment.getWorld());
+        eventSelectorDialog.setVisible(true);
+        Incident incident = eventSelectorDialog.getSelectedIncident();
         if (incident == null) {
             Sim.getInstance().setPause(false);
             return;
         }
 
-        // Create incident parameters.
+        // Create event parameters.
         LocationVariable locationVariable = (LocationVariable) incident.getParameters().get(Incident.Parameters.LOCATION_VARIABLE);
         locationVariable.setValue(new LocationAndTime(location));
-        IncidentParameterDialog incidentParameterDialog = new IncidentParameterDialog(mapFrame, incident, environment);
-        incidentParameterDialog.setVisible(true);
-        incident = incidentParameterDialog.getSelectedIncident();
-        if (incident == null) { // TODO FixMe: we do not handle a cancelled incident correctly (nullpointer exception when closing the IncidentParameterDialog).
+        EventParameterDialog eventParameterDialog = new EventParameterDialog(mapFrame, incident, environment);
+        eventParameterDialog.setVisible(true);
+        incident = eventParameterDialog.getSelectedIncident();
+        if (incident == null) { //todo: this does not handle a cancelled event correctly (nullpointer exception when closing the eventParameterDialog).
             Sim.getInstance().setPause(false);
             return;
         }
 
         // Create a plan.
         ProgressNotifier.notifyShowProgress(true);
-        ProgressNotifier.notifyProgressMessage("Planning incident...");
+        ProgressNotifier.notifyProgressMessage("Planning event...");
 
         long desiredEndTime = incident.getEnablingAction().getLocationVariable().getValue().getTimeNanos();
         Tuple<ActionPlan, Boolean> planTuple = IncidentPlanner.plan(env, incident);
@@ -359,13 +361,13 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         ProgressNotifier.notifyShowProgress(false);
 
         if (isValid) {
-            startIncident(incident, plan);
+            startEvent(incident, plan);
         } else {
             long achievedEndTime = plan.getGoalAction().getLocationVariable().getValue().getTimeNanos();
             int choice = javax.swing.JOptionPane.showConfirmDialog(
                     null,
-                    String.format("It seems %s is too soon to be able to realize this incident.\nCan it occur at %s instead?", new Time(desiredEndTime), new Time(achievedEndTime)),
-                    "Incident happens too soon", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.QUESTION_MESSAGE);
+                    String.format("It seems %s is too soon to be able to realize this event.\nCan it occur at %s instead?", new Time(desiredEndTime), new Time(achievedEndTime)),
+                    "Event happens too soon", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.QUESTION_MESSAGE);
 
             // The user wants it when s/he says it and not later...
             if (choice == javax.swing.JOptionPane.NO_OPTION) {
@@ -374,9 +376,9 @@ public class MainFrame implements IEnvironmentObserver, Observer {
 
             // Otherwise, the plan will just execute according to what the sampler managed to achieve.
             else {
-                // TODO Improve: this sometimes seems to yield plans with a negative time for certain steps.
+                // TODO This sometimes seems to yield plans with a negative time for certain steps.
                 plan.startModels(environment);
-                startIncident(incident, plan);
+                startEvent(incident, plan);
             }
         }
 
@@ -384,13 +386,12 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         Sim.getInstance().setPause(false);
     }
 
-    private void startIncident(final Incident incident, final ActionPlan plan) {
+    private void startEvent(final Incident incident, final ActionPlan plan) {
 
-        incidents.addIncident(incident);
+        events.addEvent(incident);
         visualizePlan(plan);
 
-        // Make sure the incident becomes deactivated.
-        // TODO Possible improvement: note that deactivating incidents only works if incidents always finish exactly when they have to.
+        // Make sure the event becomes deactivated. TODO Note that this only works if incidents always finish exactly when they have to.
         new Thread() {
             @Override
             public void run() {
@@ -404,14 +405,14 @@ public class MainFrame implements IEnvironmentObserver, Observer {
                         break;
                     }
                 }
-                incidents.removeIncident(incident);
+                events.removeEvent(incident);
             }
         }.start();
     }
 
     private void initAgents(List<Agent> agents) {
         for (Agent a : agents) {
-            addVisualRepresentation(a);
+            addRepresentation(a);
         }
         final PActivity a = new PActivity(-1, 200) { //Sim.getHz() * 2
             public void activityStep(final long currentTime) {
@@ -422,14 +423,14 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         canvas.getRoot().addActivity(a);
     }
 
-    private void addVisualRepresentation(ISimulatedObject s) {
+    private void addRepresentation(ISimulatedObject s) {
         if (s instanceof Agent) {
             PPath node = addCircle(agentLayer, s.getLocation(), AGENT_ICON_SIZE);
             node.addAttribute("type", NODE_TYPE_AGENT);
             node.addAttribute("agent", s);
             node.setPaint(Color.GRAY);
             node.setStrokePaint(Color.DARK_GRAY);
-            node.setStroke(new BasicStroke(0.75f)); // TODO Improve. Increase/decrease size and stroke with zooming. Small agents are hardly visible.
+            node.setStroke(new BasicStroke(0.75f)); // TODO Increase/decrease size and stroke with zooming. Small agents are hardly visible.
             node.setVisible(true);//!((Agent) s).isInside());
         } else if (s instanceof StaticAreaTrigger) {
             StaticAreaTrigger staticAreaTrigger = (StaticAreaTrigger) s;
@@ -445,7 +446,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
 //                }
             }
         }
-        // TODO Improve. Also show dynamic area triggers.
+        // TODO Also show dynamic area triggers.
     }
 
     private void setStaticTriggerNodeAttributes(StaticAreaTrigger staticAreaTrigger, PPath node) {
@@ -455,7 +456,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         node.setStroke(new BasicStroke(1f));
     }
 
-    private void removeVisualRepresentation(ISimulatedObject s) {
+    private void removeRepresentation(ISimulatedObject s) {
         for (Object nodeObject : agentLayer.getAllNodes()) {
             if (nodeObject instanceof PPath) {
                 PPath node = (PPath) nodeObject;
@@ -476,10 +477,10 @@ public class MainFrame implements IEnvironmentObserver, Observer {
 
     private void updatePositions(final long currentTime) {
 
-        for (Object o : this.agentLayer.getChildrenReference()) {
+        final Iterator i = this.agentLayer.getChildrenReference().iterator();
+        while (i.hasNext()) {
 
-            // TODO Improve. This code can create a concurrent modification exception if children are added (e.g. area triggers).
-            final PPath node = (PPath) o;
+            final PPath node = (PPath) i.next();  // TODO Can create a concurrent modification exception if children are added (e.g. area triggers).
 
             if (node.getAttribute("type").equals(NODE_TYPE_AGENT)) {
                 Agent a = (Agent) node.getAttribute("agent");
@@ -495,7 +496,6 @@ public class MainFrame implements IEnvironmentObserver, Observer {
 
                 if (moved) {
                     node.setVisible(!a.isInside());
-
                     // Administer position.
                     previousPositions.put(a, a.getLocation());
 
@@ -567,7 +567,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
                 }
             }
 
-            // TODO Improve. Visualize other node types?
+            // TODO Other node types?
         }
     }
 
@@ -627,25 +627,25 @@ public class MainFrame implements IEnvironmentObserver, Observer {
                 } else if (v instanceof GroupVariable) {
                     GroupVariable gv = (GroupVariable) v;
                     // To spawn?
-//                    if (gv.areAgentsProvided()) {
-//                        Group group = gv.getValue();
-//                        for (Agent a : group) {
-////                            PPath node = addSquare(uiLayer, a.getLocation(), 10.0);
-////                            node.setPaint(Color.RED);
-////                            if (gv.getMemberRole() != null) {
-////                                addText(uiLayer, (Point) a.getLocation(), gv.getMemberRole().getSimpleName());
-////                            }
-//                        }
-//                    } else {
-//                        // Empty
-//                    }
+                    if (gv.areAgentsProvided()) {
+                        Group group = gv.getValue();
+                        for (Agent a : group) {
+//                            PPath node = addSquare(uiLayer, a.getLocation(), 10.0);
+//                            node.setPaint(Color.RED);
+//                            if (gv.getMemberRole() != null) {
+//                                addText(uiLayer, (Point) a.getLocation(), gv.getMemberRole().getSimpleName());
+//                            }
+                        }
+                    } else {
+                        // Empty
+                    }
                 }
             }
         }
-        zoomInOnSelection();
+        zoomInOnSelection(); //todo: temp disable for TestSampler
     }
 
-    private void visualizePlan(ActionPlan plan, Agent agent, boolean showLocations) {
+    public void visualizePlan(ActionPlan plan, Agent agent, boolean showLocations) {
         Color source = AgentColorUtil.getAgentColor(agent);
         GroupVariable theGroup = null;
         for (Variable v : plan.getVariables()) {
@@ -780,13 +780,15 @@ public class MainFrame implements IEnvironmentObserver, Observer {
 
     @Override
     public void simulatedObjectAdded(ISimulatedObject newSimulatedObject) {
-        addVisualRepresentation(newSimulatedObject);
+        addRepresentation(newSimulatedObject);
     }
 
     @Override
     public void simulatedObjectRemoved(ISimulatedObject simulatedObject) {
-        removeVisualRepresentation(simulatedObject);
+        removeRepresentation(simulatedObject);
     }
+
+    long lastRefreshTimeMs = 0;
 
     @Override
     public void timeChanged(Time newTime) {
@@ -808,16 +810,23 @@ public class MainFrame implements IEnvironmentObserver, Observer {
                 List list = (List) arg;
                 if (list.size() > 0) {
                     if (list.get(0) instanceof Agent) {
-                        Set<Agent> incidentAgents = null;
+                        Set<Agent> eventAgents = null;
                         if (selectionObserver.getIncident() != null && selectionObserver.getIncident().getActionPlan() != null) {
-                            incidentAgents = selectionObserver.getIncident().getActionPlan().getAgentsInvolved();
+                            eventAgents = selectionObserver.getIncident().getActionPlan().getAgentsInvolved();
                         }
                         // for each
                         for (Object obj : list) {
                             Agent a = (Agent) obj;
-                            if (incidentAgents != null && incidentAgents.contains(a)) {
+//                            PPath node = addSquare(this.uiLayer, a.getLocation(), 20.0);
+//                            node.setPaint(null);
+//                            node.setStrokePaint(Color.BLACK);
+//                            node.setStroke(new BasicStroke(0.75f));
+                            if (eventAgents != null && eventAgents.contains(a)) {
                                 visualizePlan(selectionObserver.getIncident().getActionPlan(), a, true);
                             }
+                        }
+                        if (list.size() > 0) {
+                            //zoomInOnSelection();
                         }
                     }
                 } else {
@@ -877,7 +886,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
                 Point2D p = event.getPosition();
                 Point converted = new Point(p.getX(), -p.getY());
                 try {
-                    injectIncident(converted);
+                    addEvent(converted);
                 } catch (Exception ex) {
                     Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -885,10 +894,10 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         }
     }
 
-    private class RouteSelectionHandler extends PBasicInputEventHandler {  // TODO Improve. Merge route selection handler with click handler.
+    private class RouteSelectionHandler extends PBasicInputEventHandler {  // TODO Merge with click handler.
         private Point prev;
 
-        RouteSelectionHandler() {
+        public RouteSelectionHandler() {
             super();
             this.prev = null;
         }

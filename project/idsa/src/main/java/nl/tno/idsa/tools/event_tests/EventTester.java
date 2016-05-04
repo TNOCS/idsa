@@ -1,9 +1,9 @@
 package nl.tno.idsa.tools.event_tests;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.planners.IncidentPlanner;
+import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.messaging.Messenger;
-import nl.tno.idsa.framework.planners.ActionPlan;
-import nl.tno.idsa.framework.planners.IncidentPlanner;
 import nl.tno.idsa.framework.population.PopulationGenerator;
 import nl.tno.idsa.framework.simulator.Sim;
 import nl.tno.idsa.framework.utils.Tuple;
