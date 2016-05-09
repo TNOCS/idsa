@@ -35,7 +35,7 @@ public class NameGenerator {
 
     private NameGenerator(String language_id) throws IOException {
 
-        String firstNames = readFile("../../data/names/firstnames_" + language_id + ".csv");
+        String firstNames = readFile("../../data/nl/names/firstnames_" + language_id + ".csv");
         String[] firstNameLines = firstNames.split("\n");
         for (String line : firstNameLines) {
             try {
@@ -63,7 +63,7 @@ public class NameGenerator {
             }
         }
 
-        String lastNames = readFile("../../data/names/lastnames_" + language_id + ".csv");
+        String lastNames = readFile("../../data/nl/names/lastnames_" + language_id + ".csv");
         String[] lastNameLines = lastNames.split("\n");
         for (String line : lastNameLines) {
             try {

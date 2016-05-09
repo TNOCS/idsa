@@ -235,7 +235,11 @@ public class Agent implements ISimulatedObject {
     }
 
     public Vertex getHouse() {
-        return getHouseLocation().getVertices().get(0);
+        Vertex result = null;
+        if (house != null && house.numberOfVertices() > 0) {
+            result = house.getVertices().get(0);            
+        }
+        return result;
     }
 
     public Area getHouseLocation() {
@@ -302,12 +306,16 @@ public class Agent implements ISimulatedObject {
     }
 
     public boolean supportsRole(Class<? extends Role> role) {
-        try {
-            Role roleInstance = SemanticLibrary.getInstance().getSemanticPrototypeInstance(role);
-            return roleInstance != null && roleInstance.isAgentSuitable(this);
-        } catch (InstantiationException e) {
-            return false;
+        boolean result = true;
+        if (role != null) {            
+            try {
+                Role roleInstance = SemanticLibrary.getInstance().getSemanticPrototypeInstance(role);
+                result = roleInstance != null && roleInstance.isAgentSuitable(this);
+            } catch (InstantiationException e) {
+                result = false;
+            }
         }
+        return result;
     }
 
     public Class<? extends Role> getRole() {
