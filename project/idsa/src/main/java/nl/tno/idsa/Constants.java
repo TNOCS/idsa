@@ -45,4 +45,11 @@ public class Constants {
      * How many iterations does the optimization algorithm for neighborhood population take?
      */
     public static final int NEIGHBORHOOD_OPTIMIZATION_ITERATIONS = 1000000;
+
+    /**
+     * For debugging or speeding up the simulator, it might be handy to be able to have only a maximum number
+     * of agents (picked randomly) with agendas, instead of all agents. Set this to Integer.MAX_VALUE if you
+     * do not want to limit the number of agendas created.
+     */
+    public final static int MAX_AGENTS_WITH_AGENDAS = 10; //Integer.MAX_VALUE;
 }

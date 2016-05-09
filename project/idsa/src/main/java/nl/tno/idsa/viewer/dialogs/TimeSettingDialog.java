@@ -1,4 +1,4 @@
-package nl.tno.idsa.viewer.timesettings;
+package nl.tno.idsa.viewer.dialogs;
 
 import nl.tno.idsa.framework.world.Environment;
 import nl.tno.idsa.viewer.components.TimeSetterPanel;

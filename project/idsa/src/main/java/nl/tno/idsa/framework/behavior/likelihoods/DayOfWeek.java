@@ -1,7 +1,10 @@
 package nl.tno.idsa.framework.behavior.likelihoods;
 
 import nl.tno.idsa.framework.semantics_base.enumerations.IRuntimeEnumElement;
+import nl.tno.idsa.framework.semantics_base.enumerations.RuntimeEnum;
 import nl.tno.idsa.framework.world.Day;
+
+import java.util.Collection;
 
 /**
  * Days of the week form the basis for our activity likelihood definitions.
@@ -11,6 +14,19 @@ public abstract class DayOfWeek extends ActivityLikelihoodMap implements IRuntim
     public DayOfWeek() {
         super();
         makeActivities();
+    }
+
+    /**
+     * Returns the day of the week for the day given.
+     */
+    public static DayOfWeek getDayOfWeek(Day day) {
+        Collection<DayOfWeek> dayOfWeeks = RuntimeEnum.getInstance(DayOfWeek.class).listOptions();
+        for (DayOfWeek dayOfWeek : dayOfWeeks) {
+            if (dayOfWeek.getPrototypeDay().getDayOfWeek() == day.getDayOfWeek()) {
+                return dayOfWeek;
+            }
+        }
+        return null;
     }
 
     /**

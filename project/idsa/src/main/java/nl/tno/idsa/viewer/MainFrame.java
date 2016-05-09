@@ -21,14 +21,14 @@ import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.framework.world.Point;
 import nl.tno.idsa.library.models.BasicMovementModel;
 import nl.tno.idsa.viewer.components.ProgressDialog;
+import nl.tno.idsa.viewer.dialogs.SeasonSettingDialog;
+import nl.tno.idsa.viewer.dialogs.TimeSettingDialog;
 import nl.tno.idsa.viewer.eventsettings.IncidentParameterDialog;
 import nl.tno.idsa.viewer.eventsettings.IncidentSelectorDialog;
 import nl.tno.idsa.viewer.inspectors.AgentInspectorPanel;
 import nl.tno.idsa.viewer.inspectors.AreaInspectorPanel;
 import nl.tno.idsa.viewer.inspectors.IncidentInspectorPanel;
 import nl.tno.idsa.viewer.observers.RunningIncidentsObserver;
-import nl.tno.idsa.viewer.timesettings.SeasonSettingDialog;
-import nl.tno.idsa.viewer.timesettings.TimeSettingDialog;
 import nl.tno.idsa.viewer.utils.AgentColorUtil;
 import nl.tno.idsa.viewer.utils.AreaColorUtil;
 import org.piccolo2d.PCanvas;
@@ -150,6 +150,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         final JButton setTimeButton = new JButton(new AbstractAction("Time...") {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // The multiplier selector also asks for time, but changing ONLY the time does not require recomputing the agendas.
                 TimeSettingDialog timeSettingDialog = new TimeSettingDialog(mapFrame, env);   // The dialog decides whether it must be visible.
             }
         });

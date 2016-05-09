@@ -1,13 +1,13 @@
 package nl.tno.idsa.framework.behavior.planners;
 
+import nl.tno.idsa.Constants;
 import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.behavior.activities.concrete.Activity;
 import nl.tno.idsa.framework.behavior.activities.concrete.BasicMovementActivity;
 import nl.tno.idsa.framework.behavior.activities.possible.PossibleActivity;
 import nl.tno.idsa.framework.behavior.likelihoods.ActivityLikelihoodMap;
 import nl.tno.idsa.framework.behavior.likelihoods.DayOfWeek;
-import nl.tno.idsa.framework.behavior.multipliers.ISeason;
-import nl.tno.idsa.framework.behavior.multipliers.ITimeOfYear;
+import nl.tno.idsa.framework.behavior.multipliers.IMultiplier;
 import nl.tno.idsa.framework.messaging.ProgressNotifier;
 import nl.tno.idsa.framework.semantics_base.SemanticLibrary;
 import nl.tno.idsa.framework.semantics_impl.groups.Group;
@@ -30,7 +30,6 @@ public class AgendaPlanner {
 
     // Settings and data structures for debugging. *********************************************************************
 
-    private final static int DEBUG_MAX_HOUSEHOLDS_TO_PROCESS = Integer.MAX_VALUE;
     private final static int DEBUG_NUM_SAMPLE_AGENDAS = 0;
     private final static boolean DEBUG_QUIT_WHEN_DONE_MAKING_AGENDAS = false;
     private static TreeMap<PossibleActivity, Tuple<Integer, Integer>> successesAndFailures = new TreeMap<>();
@@ -57,18 +56,17 @@ public class AgendaPlanner {
 
     // End settings and data structures for debugging. *****************************************************************
 
-    private final ISeason season; // TODO A better approach would be to have a list of IMultiplier implementations.
-    private final ITimeOfYear timeOfTheYear;
     private final DayOfWeek dayOfWeek;
     private final World world;
 
+    private final IMultiplier[] multipliers;
+
     private final Map<Agent, ActivityLikelihoodMap> activityProbabilities;
 
-    public AgendaPlanner(ISeason season, ITimeOfYear timeOfTheYear, DayOfWeek dayOfWeek, World world) {
-        this.season = season;
-        this.timeOfTheYear = timeOfTheYear;
-        this.dayOfWeek = dayOfWeek;
+    public AgendaPlanner(World world, DayOfWeek dayOfWeek, IMultiplier... multipliers) {
         this.world = world;
+        this.dayOfWeek = dayOfWeek;
+        this.multipliers = multipliers;
         this.activityProbabilities = new HashMap<>(30000);
     }
 
@@ -113,7 +111,7 @@ public class AgendaPlanner {
             int current1 = current = current + 16;
             ProgressNotifier.notifyProgress(current1 / total);
             ProgressNotifier.notifyProgressMessage("Planning activities... Household " + ++h + " of " + households.size());
-            if (i++ > DEBUG_MAX_HOUSEHOLDS_TO_PROCESS) {
+            if (i++ > Constants.MAX_AGENTS_WITH_AGENDAS) {
                 break;
             }
         }
@@ -128,7 +126,7 @@ public class AgendaPlanner {
             int current1 = current = current + 2;
             ProgressNotifier.notifyProgress(current1 / total);
             ProgressNotifier.notifyProgressMessage("Optimizing activities... Household " + ++h + " of " + households.size());
-            if (i++ > DEBUG_MAX_HOUSEHOLDS_TO_PROCESS) {
+            if (i++ > Constants.MAX_AGENTS_WITH_AGENDAS) {
                 break;
             }
         }
@@ -300,11 +298,10 @@ public class AgendaPlanner {
 
     private void applyMultipliers(Agent agent) {
         ActivityLikelihoodMap agentProbabilities = dayOfWeek.initializeLikelihoods(agent);
-        if (season != null) {
-            season.applyMultipliers(agent, agentProbabilities);
-        }
-        if (timeOfTheYear != null) {
-            timeOfTheYear.applyMultipliers(agent, agentProbabilities);
+        for (IMultiplier multiplier : multipliers) {
+            if (multiplier != null) { // It is possible if we chose e.g. defaults.
+                multiplier.applyMultipliers(agent, agentProbabilities);
+            }
         }
         activityProbabilities.put(agent, agentProbabilities);
     }

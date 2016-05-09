@@ -1,6 +1,7 @@
-package nl.tno.idsa.viewer.timesettings;
+package nl.tno.idsa.viewer.dialogs;
 
 import nl.tno.idsa.framework.agents.Agent;
+import nl.tno.idsa.framework.behavior.likelihoods.ActivityLikelihoodMap;
 import nl.tno.idsa.framework.behavior.likelihoods.DayOfWeek;
 import nl.tno.idsa.framework.behavior.multipliers.ISeason;
 import nl.tno.idsa.framework.behavior.multipliers.ITimeOfYear;
@@ -8,20 +9,30 @@ import nl.tno.idsa.framework.semantics_base.enumerations.RuntimeEnum;
 import nl.tno.idsa.framework.utils.TextUtils;
 import nl.tno.idsa.framework.world.Day;
 import nl.tno.idsa.framework.world.Environment;
+import nl.tno.idsa.framework.world.Time;
+import nl.tno.idsa.framework.world.World;
+import nl.tno.idsa.viewer.components.TimeSetterPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Vector;
-import nl.tno.idsa.framework.behavior.likelihoods.ActivityLikelihoodMap;
 
-// TODO Document class.
+// TODO This dialog should ask for all the multipliers plus the day. Currently the multipliers are hardcoded.
 public class SeasonSettingDialog extends JDialog {
-    public SeasonSettingDialog(JFrame owner, final Environment environment) {
-        super(owner, "Set season and time of the year");
 
-        boolean promptMakesSense = false;
+    private ISeason selectedSeason;
+    private ITimeOfYear selectedTimeOfYear;
+    private DayOfWeek selectedDayOfWeek;
+    private Time selectedTime;
+    private boolean cancelled;
+
+    /**
+     * Environment may be null, in which case you need to call applySettingsTo(...) manually.
+     */
+    public SeasonSettingDialog(JFrame owner, final Environment environment) {
+        super(owner, "Set multipliers", ModalityType.APPLICATION_MODAL);
 
         JPanel contentPane = new JPanel(new BorderLayout(3, 3));
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -44,14 +55,17 @@ public class SeasonSettingDialog extends JDialog {
             }
         });
         if (days.size() > 1) {
+            if (environment != null) {
+                DayOfWeek dayOfWeek = DayOfWeek.getDayOfWeek(environment.getDay());
+                daySelector.setSelectedItem(dayOfWeek);
+            }
             topLeft.add(new JLabel("Day"));
             topRight.add(daySelector);
-            promptMakesSense = true;
         }
 
         Vector<ISeason> seasons = new Vector<>(RuntimeEnum.getInstance(ISeason.class).listOptions());
         UnspecifiedSeason unspecifiedSeason = new UnspecifiedSeason();
-        seasons.set(0, unspecifiedSeason);
+        seasons.insertElementAt(unspecifiedSeason, 0);
         final JComboBox<ISeason> seasonSelector = new JComboBox<>(seasons);
         seasonSelector.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -60,60 +74,73 @@ public class SeasonSettingDialog extends JDialog {
                 return super.getListCellRendererComponent(list, representation, index, isSelected, cellHasFocus);
             }
         });
-        seasonSelector.setSelectedItem(unspecifiedSeason);
         if (seasons.size() > 1) {
+            if (environment != null) {
+                if (environment.getSeason() != null) {
+                    seasonSelector.setSelectedItem(environment.getSeason());
+                } else {
+                    seasonSelector.setSelectedItem(unspecifiedSeason);
+                }
+            }
             topLeft.add(new JLabel("Season"));
             topRight.add(seasonSelector);
-            promptMakesSense = true;
         }
 
         Vector<ITimeOfYear> timesOfYear = new Vector<>(RuntimeEnum.getInstance(ITimeOfYear.class).listOptions());
         UnspecifiedTimeOfYear unspecifiedTimeOfTheYear = new UnspecifiedTimeOfYear();
-        timesOfYear.set(0, unspecifiedTimeOfTheYear);
-        final JComboBox<ITimeOfYear> timesOfYearSelector = new JComboBox<>(timesOfYear);
-        timesOfYearSelector.setRenderer(new DefaultListCellRenderer() {
+        timesOfYear.insertElementAt(unspecifiedTimeOfTheYear, 0);
+        final JComboBox<ITimeOfYear> timeOfTheYearSelector = new JComboBox<>(timesOfYear);
+        timeOfTheYearSelector.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 String representation = TextUtils.camelCaseToText(value.getClass().getSimpleName());
                 return super.getListCellRendererComponent(list, representation, index, isSelected, cellHasFocus);
             }
         });
-        timesOfYearSelector.setSelectedItem(unspecifiedTimeOfTheYear);
         if (timesOfYear.size() > 1) {
+            if (environment != null) {
+                if (environment.getTimeOfTheYear() != null) {
+                    timeOfTheYearSelector.setSelectedItem(environment.getTimeOfTheYear());
+                } else {
+                    timeOfTheYearSelector.setSelectedItem(unspecifiedTimeOfTheYear);
+                }
+            }
             topLeft.add(new JLabel("Time of the year"));
-            topRight.add(timesOfYearSelector);
-            promptMakesSense = true;
+            topRight.add(timeOfTheYearSelector);
         }
 
-        if (!promptMakesSense) {
-            JOptionPane.showMessageDialog(getParent(), "There are no seasons or times of the year in the library.", "Unsupported", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
+        Time time = environment != null ? environment.getTime() : new Time(12, 0, 0);
+        final TimeSetterPanel timeSetterPanel = new TimeSetterPanel(time);
+        topLeft.add(new JLabel("Time of day"));
+        topRight.add(timeSetterPanel);
 
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER, 3, 3));
         JButton okButton = new JButton(new AbstractAction("OK") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DayOfWeek day = (DayOfWeek) daySelector.getSelectedItem();
-                Day dday = (day != null) ? day.getPrototypeDay() : environment.getDay();
-                ISeason season = (ISeason) seasonSelector.getSelectedItem();
-                if (season.getClass() == UnspecifiedSeason.class) {
-                    season = null;
+                cancelled = false;
+                selectedDayOfWeek = (DayOfWeek) daySelector.getSelectedItem();
+                selectedSeason = (ISeason) seasonSelector.getSelectedItem();
+                if (selectedSeason.getClass() == UnspecifiedSeason.class) {
+                    selectedSeason = null;
                 }
-                ITimeOfYear timeOfTheYear = (ITimeOfYear) timesOfYearSelector.getSelectedItem();
-                if (timeOfTheYear.getClass() == UnspecifiedTimeOfYear.class) {
-                    timeOfTheYear = null;
+                selectedTimeOfYear = (ITimeOfYear) timeOfTheYearSelector.getSelectedItem();
+                if (selectedTimeOfYear.getClass() == UnspecifiedTimeOfYear.class) {
+                    selectedTimeOfYear = null;
                 }
-                environment.initializePopulation(season, timeOfTheYear,
-                        dday, environment.getTime(), true);
+                selectedTime = timeSetterPanel.getValue();
+
+                System.out.println(selectedSeason + " " + selectedTimeOfYear + " " + selectedDayOfWeek + " " + selectedTime);
+
+                applySettingsTo(environment);
                 dispose();
-                // TODO Add some kind of waiting dialog box.
             }
         });
         bottom.add(okButton);
         JButton cancelButton = new JButton(new AbstractAction("Cancel") {
             @Override
             public void actionPerformed(ActionEvent e) {
+                cancelled = true;
                 dispose();
             }
         });
@@ -124,6 +151,22 @@ public class SeasonSettingDialog extends JDialog {
         pack();
 
         setVisible(true);
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public Environment createEnvironmentWithSettings(World world) {
+        return new Environment(world, selectedSeason, selectedTimeOfYear, selectedDayOfWeek.getPrototypeDay(), selectedTime);
+    }
+
+    public void applySettingsTo(Environment environment) {
+        if (environment == null) {
+            return;
+        }
+        Day selectedDay = (selectedDayOfWeek != null) ? selectedDayOfWeek.getPrototypeDay() : environment.getDay();
+        environment.initializePopulation(selectedSeason, selectedTimeOfYear, selectedDay, selectedTime, true);
     }
 
     private class UnspecifiedSeason implements ISeason {

@@ -5,12 +5,15 @@ import nl.tno.idsa.framework.messaging.ProgressNotifier;
 import nl.tno.idsa.framework.population.PopulationGenerator;
 import nl.tno.idsa.framework.simulator.Sim;
 import nl.tno.idsa.framework.utils.RandomNumber;
-import nl.tno.idsa.framework.world.*;
-import nl.tno.idsa.library.activities.multipliers.Winter;
+import nl.tno.idsa.framework.world.Environment;
+import nl.tno.idsa.framework.world.Vertex;
+import nl.tno.idsa.framework.world.World;
+import nl.tno.idsa.framework.world.WorldGenerator;
 import nl.tno.idsa.library.locations.PoliceSpawnPoint;
 import nl.tno.idsa.library.population.PopulationDataNL;
 import nl.tno.idsa.library.world.WorldModelNL;
 import nl.tno.idsa.viewer.components.ProgressDialog;
+import nl.tno.idsa.viewer.dialogs.SeasonSettingDialog;
 
 import java.util.List;
 
@@ -31,22 +34,28 @@ public class GUI {
 
         World world = WorldGenerator.generateWorld(new WorldModelNL(), "../../data/nl/idsa_nav_network_pedestrian.shp", "../../data/nl/idsa_pand_osm_a_utm31n.shp", "../../data/nl/idsa_public_areas_a_utm31n.shp", "../../data/nl/idsa_vbo_utm31n.shp", "../../data/nl/idsa_pand_p_utm31n.shp");
 
+        SeasonSettingDialog ssd = new SeasonSettingDialog(null, null);
+        if (ssd.isCancelled()) {
+            return;
+        }
+
+        Environment env = ssd.createEnvironmentWithSettings(world);
+
         ProgressNotifier.notifyProgressMessage("Creating environment...");
 
-        // TODO Show a dialog for time and day.
-        Environment env;
-        // Sunday 11:00 Summer
-        // env = new Environment(world, new Summer(), null, new Day(14, 6, 2015), new Time(11, 0, 0));
-        // Sunday 11:00 Winter
-        // env = new Environment(world, new Winter(), null, new Day(16, 11, 2015), new Time(11, 0, 0));
-        // Monday 11:00
-        // env = new Environment(world, new Winter(), null, new Day(21, 9, 2015), new Time(11, 0, 0));
-        // Monday 17:00
-        // env = new Environment(world, new Winter(), null, new Day(21, 9, 2015), new Time(17, 0, 0));
-        // Monday 11:00
-        // env = new Environment(world, new Winter(), null, new Day(21, 9, 2015), new Time(11, 0, 0));
-        // Saturday 11:00
-        env = new Environment(world, new Winter(), null, new Day(26, 9, 2015), new Time(12, 0, 0));
+//        Environment env;
+//        // Sunday 11:00 Summer
+//        // env = new Environment(world, new Summer(), null, new Day(14, 6, 2015), new Time(11, 0, 0));
+//        // Sunday 11:00 Winter
+//        // env = new Environment(world, new Winter(), null, new Day(16, 11, 2015), new Time(11, 0, 0));
+//        // Monday 11:00
+//        // env = new Environment(world, new Winter(), null, new Day(21, 9, 2015), new Time(11, 0, 0));
+//        // Monday 17:00
+//        // env = new Environment(world, new Winter(), null, new Day(21, 9, 2015), new Time(17, 0, 0));
+//        // Monday 11:00
+//        // env = new Environment(world, new Winter(), null, new Day(21, 9, 2015), new Time(11, 0, 0));
+//        // Saturday 11:00
+//        env = new Environment(world, new Winter(), null, new Day(26, 9, 2015), new Time(12, 0, 0));
 
         PopulationGenerator populationGenerator = new PopulationGenerator(env, new PopulationDataNL());
         ProgressNotifier.notifyProgress(15);
