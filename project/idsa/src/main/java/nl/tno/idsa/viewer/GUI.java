@@ -29,7 +29,7 @@ public class GUI {
         ProgressNotifier.notifyShowProgress(true);
         ProgressNotifier.notifyProgressMessage("Loading world data...");
 
-        World world = WorldGenerator.generateWorld(new WorldModelNL(), "../../data/idsa_nav_network_pedestrian.shp", "../../data/idsa_pand_osm_a_utm31n.shp", "../../data/idsa_public_areas_a_utm31n.shp", "../../data/idsa_vbo_utm31n.shp", "../../data/idsa_pand_p_utm31n.shp");
+        World world = WorldGenerator.generateWorld(new WorldModelNL(), "../../data/nl/idsa_nav_network_pedestrian.shp", "../../data/nl/idsa_pand_osm_a_utm31n.shp", "../../data/nl/idsa_public_areas_a_utm31n.shp", "../../data/nl/idsa_vbo_utm31n.shp", "../../data/nl/idsa_pand_p_utm31n.shp");
 
         ProgressNotifier.notifyProgressMessage("Creating environment...");
 
@@ -50,7 +50,7 @@ public class GUI {
 
         PopulationGenerator populationGenerator = new PopulationGenerator(env, new PopulationDataNL());
         ProgressNotifier.notifyProgress(15);
-        env.setPopulation(populationGenerator.generatePopulation("../../data/idsa_cbs_buurten_utm31n.shp")); // TODO Hardcoded input file.
+        env.setPopulation(populationGenerator.generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp")); // TODO Hardcoded input file.
         ProgressNotifier.notifyProgress(85);
         env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), makeAgendas);
 

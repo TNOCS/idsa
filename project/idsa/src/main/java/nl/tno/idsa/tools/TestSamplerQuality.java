@@ -74,9 +74,9 @@ public class TestSamplerQuality {
     public static void main(String[] args) throws Exception {
 
         //Create world. TODO Hardcoded input.
-        World world = WorldGenerator.generateWorld(new WorldModelNL(), "../../data/idsa_nav_network_pedestrian.shp", "../../data/idsa_pand_osm_a_utm31n.shp", "../../data/idsa_public_areas_a_utm31n.shp", "../../data/idsa_vbo_utm31n.shp", "../../data/idsa_pand_p_utm31n.shp");
+        World world = WorldGenerator.generateWorld(new WorldModelNL(), "../../data/nl/idsa_nav_network_pedestrian.shp", "../../data/nl/idsa_pand_osm_a_utm31n.shp", "../../data/nl/idsa_public_areas_a_utm31n.shp", "../../data/nl/idsa_vbo_utm31n.shp", "../../data/nl/idsa_pand_p_utm31n.shp");
         Environment env = new Environment(world, new Day(21, 9, 2015), new Time(10, 0, 0)); //there are people on the streets at this time.
-        env.setPopulation(new PopulationGenerator(env, new PopulationDataNL()).generatePopulation("../../data/idsa_cbs_buurten_utm31n.shp"));
+        env.setPopulation(new PopulationGenerator(env, new PopulationDataNL()).generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp"));
         env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), true);
         Messenger.setEnvironment(env);
         Messenger.enableMirrorToConsole(true);

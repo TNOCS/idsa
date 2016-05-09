@@ -11,16 +11,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Created by jongsd on 11-8-15.
+/** The semantic library gathers and maintains all semantic knowledge, e.g. super/subclass relations, prototype instances
+ * of the semantic objects found, et cetera.
  */
-
-// TODO Document class.
-
 public enum SemanticLibrary {
+
+    /** Enum singleton. */
     INSTANCE;
 
-    @SuppressWarnings("unchecked")
+    /** Regular singleton. */
     public static SemanticLibrary getInstance() {
         return INSTANCE;
     }
@@ -30,7 +29,7 @@ public enum SemanticLibrary {
 
     private Set<SemanticRelation> relations = new HashSet<>(); // For now we do a linear search here.
 
-    private HashMap<Integer, Object> cache = new HashMap<>(); // TODO Start removing cache items if we run out of memory.
+    private HashMap<Integer, Object> cache = new HashMap<>(); // TODO We need to start removing cache items if we run out of memory.
     private int cacheHits;
 
     @SuppressWarnings("unchecked")
@@ -69,21 +68,6 @@ public enum SemanticLibrary {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private <T extends SemanticObject> Set<T> createSubclassInstances(Class<? extends T> baseClass) {
-        HashSet<T> instances = new HashSet<T>();
-        Set classes = JavaSubclassFinder.listSubclasses(baseClass); // Should be Set<Class<? extends T>>, but Java and generics...
-        for (Object clazz : classes) {
-            try {
-                T instance = (T) newInstance((Class) clazz); // And now we need two unchecked casts. Thank you, Java.
-                instances.add(instance);
-            } catch (Exception e) {
-                // Yeah, no.
-            }
-        }
-        return instances;
-    }
-
     /**
      * Returns a prototype instance for the given semantic class. Note that this does not create a new instance,
      * it merely returns the default-constructor instance that was created when the library was filled.
@@ -118,7 +102,7 @@ public enum SemanticLibrary {
     }
 
     /**
-     * Lists the parameters for a given class.
+     * Returns the parameters for a given class.
      */
     public Set<ParameterId> getParameters(Class<? extends SemanticObject> semanticClass) {
         SemanticObject semanticObject = classToInstance.get(semanticClass);
@@ -140,7 +124,7 @@ public enum SemanticLibrary {
             if (variable != null && variable.getValue() != null) {
                 return variable.getValue();
             } else {
-                // Recurse to superclasses.
+                // Recursion to superclasses.
                 Set superclasses = semanticObject.getSemanticSuperclasses();
                 if (superclasses != null) {
                     for (Object o : superclasses) {
@@ -156,7 +140,7 @@ public enum SemanticLibrary {
     }
 
     /**
-     * List all superclasses of the semantic class.
+     * Lists all superclasses of the semantic class.
      */
     public <T extends SemanticObject> Set<Class<? extends T>> listSemanticSuperclasses(Class<? extends T> semanticClass) {
         Set<Class<? extends T>> result = new HashSet<>();
@@ -183,12 +167,12 @@ public enum SemanticLibrary {
     }
 
     /**
-     * List all subclasses of the semantic base class.
+     * Lists all semantic subclasses of the semantic base class.
      */
     @SuppressWarnings("unchecked")
     public <B extends SemanticObject> Set<Class<? extends B>> listSemanticSubclasses(Class<? extends B> semanticBaseClass) {
         // List all subclasses.
-        Class clz = getJavaAncestor(semanticBaseClass); // Without this, the code does not compile. Java generics are really, utterly stupid.
+        Class clz = getSemanticAncestor(semanticBaseClass); // Without this, the code does not compile. Java generics are really, utterly stupid.
         Set<Class<? extends B>> subclasses = new HashSet<>();
         subclasses.add(semanticBaseClass);
         Set<Class<? extends B>> allClasses = JavaSubclassFinder.listSubclasses(clz); // This is an unchecked cast because of the clz variable.
@@ -203,16 +187,17 @@ public enum SemanticLibrary {
     /**
      * Returns the topmost class (below SemanticObject) that the given class inherits from in Java.
      */
-    public Class getJavaAncestor(Class<? extends SemanticObject> semanticBaseClass) {
+    @SuppressWarnings("unchecked")
+    public Class<? extends SemanticObject> getSemanticAncestor(Class<? extends SemanticObject> semanticClass) {
         // Limit the search space a bit.
-        Class javaBaseClass = semanticBaseClass;
+        Class javaBaseClass = semanticClass;
         while (!javaBaseClass.getSuperclass().equals(SemanticObject.class)) {
             javaBaseClass = javaBaseClass.getSuperclass();
             if (javaBaseClass == null) {
                 return null;
             }
         }
-        return javaBaseClass;
+        return javaBaseClass;  // Unchecked.
     }
 
     /**
