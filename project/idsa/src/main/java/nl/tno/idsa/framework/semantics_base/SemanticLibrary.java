@@ -235,15 +235,8 @@ public enum SemanticLibrary {
             return true;
         }
 
-        // Cache lookup.
-        Object cached = getCachedValue(potentialSubclass, potentialSuperclass);
-        if (cached != null) {
-            return (Boolean) cached;
-        }
-
-        boolean returnValue;
-
         // Check whether we know this class.
+        boolean returnValue;
         SemanticObject instance = classToInstance.get(potentialSubclass);
         SemanticObject potentialSuperInstance = classToInstance.get(potentialSuperclass);
         if (instance == null || potentialSuperInstance == null) {
@@ -252,9 +245,6 @@ public enum SemanticLibrary {
             // Return whether the instances are (in-)directly related as sub-/super-type.
             returnValue = isSemanticSuperclassR(potentialSubclass, potentialSuperclass);
         }
-
-        // Cache.
-        addToCache(returnValue, potentialSubclass, potentialSuperclass);
 
         // Return.
         return returnValue;
@@ -321,13 +311,6 @@ public enum SemanticLibrary {
 
     @SuppressWarnings("unchecked")
     public <F, T> Set<SemanticRelation<F, T>> getSemanticRelationsFrom(Class<? extends F> origin, Class<? extends SemanticRelation<F, T>> relationClass) {
-
-        // Cached?
-        Object cachedValue = getCachedValue(origin, relationClass);
-        if (cachedValue != null) {
-            return (Set<SemanticRelation<F, T>>) cachedValue;
-        }
-
         // Create set.
         HashSet<SemanticRelation<F, T>> result = new HashSet<>();
         for (SemanticRelation semanticRelation : relations) {
@@ -337,21 +320,11 @@ public enum SemanticLibrary {
                 }
             }
         }
-
-        // Cache and return.
-        addToCache(result, origin, relationClass);
         return result;
     }
 
     @SuppressWarnings("unchecked")
     public <F, T> Set<SemanticRelation<F, T>> getSemanticRelationsTo(Class<? extends SemanticRelation<F, T>> relationClass, Class<? extends T> target) {
-
-        // Cached?
-        Object cachedValue = getCachedValue(relationClass, target);
-        if (cachedValue != null) {
-            return (Set<SemanticRelation<F, T>>) cachedValue;
-        }
-
         HashSet<SemanticRelation<F, T>> result = new HashSet<>();
         for (SemanticRelation semanticRelation : relations) {
             if (isSemanticSuperclass(semanticRelation.getClass(), relationClass)) {
@@ -360,39 +333,6 @@ public enum SemanticLibrary {
                 }
             }
         }
-
-        // Cache and return.
-        addToCache(result, relationClass, target);
         return result;
-    }
-
-    // TODO The library has a rudimentary cache mechanism to (theoretically) speed up repeated look-ups. ...
-    // At the moment, only the library itself uses it, saving ~80K look-ups on a small plan plus sampling.
-    // We can use the cache elsewhere (i.e. for operations AROUND the library), but also, we need to make
-    // sure that the cache does not become far too big (or far too slow due to its size).
-
-    private int createCacheKey(Object key1, Object... objects) {
-        int result = key1.hashCode();
-        for (Object o : objects) {
-            long temp = Double.doubleToLongBits(o.hashCode());
-            result = 31 * result + (int) (temp ^ (temp >>> 32));
-        }
-        return result;
-    }
-
-    public Object getCachedValue(Object key1, Object... key) {
-        Object o = cache.get(createCacheKey(key1, key));
-        if (o != null) {
-            cacheHits++;
-        }
-        return o;
-    }
-
-    public void addToCache(Object data, Object key1, Object... key) {
-        cache.put(createCacheKey(key1, key), data);
-    }
-
-    public int getCacheHits() {
-        return cacheHits;
     }
 }
