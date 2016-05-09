@@ -11,15 +11,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-/** The semantic library gathers and maintains all semantic knowledge, e.g. super/subclass relations, prototype instances
+/**
+ * The semantic library gathers and maintains all semantic knowledge, e.g. super/subclass relations, prototype instances
  * of the semantic objects found, et cetera.
  */
 public enum SemanticLibrary {
 
-    /** Enum singleton. */
+    /**
+     * Enum singleton.
+     */
     INSTANCE;
 
-    /** Regular singleton. */
+    /**
+     * Regular singleton.
+     */
     public static SemanticLibrary getInstance() {
         return INSTANCE;
     }
@@ -28,9 +33,6 @@ public enum SemanticLibrary {
     private HashMap<Class<? extends SemanticObject>, Set<Class<? extends SemanticObject>>> classToSuperclasses = new HashMap<>();
 
     private Set<SemanticRelation> relations = new HashSet<>(); // For now we do a linear search here.
-
-    private HashMap<Integer, Object> cache = new HashMap<>(); // TODO We need to start removing cache items if we run out of memory.
-    private int cacheHits;
 
     @SuppressWarnings("unchecked")
     private SemanticLibrary() {
