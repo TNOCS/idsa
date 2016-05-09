@@ -11,7 +11,7 @@ import nl.tno.idsa.framework.world.Time;
  */
 public abstract class SynchronousSingleStepModel extends Model {
 
-    private boolean hasRun = false; // TODO Access control.
+    private boolean hasRun = false;
 
     @Override
     protected long doEstimateMinimumTimeToExecute(IGeometry currentActorLocation) {

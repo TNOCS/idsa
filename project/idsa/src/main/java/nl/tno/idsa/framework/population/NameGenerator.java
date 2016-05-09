@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 
-// TODO Document class, including how input must be formatted et cetera. Is it in a logical package now?
-
+// TODO Document how input must be formatted.
 public class NameGenerator {
 
     private static Map<String, NameGenerator> instances;

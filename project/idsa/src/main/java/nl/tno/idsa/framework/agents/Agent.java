@@ -1,5 +1,6 @@
 package nl.tno.idsa.framework.agents;
 
+import nl.tno.idsa.Constants;
 import nl.tno.idsa.framework.behavior.activities.concrete.Activity;
 import nl.tno.idsa.framework.behavior.activities.concrete.TimeInterval;
 import nl.tno.idsa.framework.behavior.models.Model;
@@ -71,7 +72,7 @@ public class Agent implements ISimulatedObject {
         // Name generation
         if (name == null) {
             try {
-                name = NameGenerator.getInstance("nl").generateName(year, gender, age); // TODO Constant for Dutch names.
+                name = NameGenerator.getInstance(Constants.NAMES_LANGUAGE_ID).generateName(year, gender, age);
             } catch (Exception e) {
                 // e.printStackTrace();
                 name = new String[]{"?", "?"};

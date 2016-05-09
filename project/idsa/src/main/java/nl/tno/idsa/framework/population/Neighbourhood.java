@@ -1,5 +1,6 @@
 package nl.tno.idsa.framework.population;
 
+import nl.tno.idsa.Constants;
 import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.semantics_impl.groups.Group;
 import nl.tno.idsa.framework.utils.RandomNumber;
@@ -16,9 +17,6 @@ import java.util.List;
 // TODO No documentation.
 // TODO Code formatting.
 public class Neighbourhood {
-
-    // TODO Magic number of a million iterations.
-    private static final int iterations = 1000000;
 
     private final String neighbourhoodName;
     private final Statistics expected;
@@ -47,7 +45,7 @@ public class Neighbourhood {
         // Before
         int currentTAE = expected.calculateTAE(current);
         System.out.println(neighbourhoodName + ": initial error: " + currentTAE);
-        for (int i = 0; i < iterations; ++i) {
+        for (int i = 0; i < Constants.NEIGHBORHOOD_OPTIMIZATION_ITERATIONS; ++i) {
             // Pick a random house to optimize
             House house = houses.get(RandomNumber.nextInt(houses.size()));
             Group houseHousehold = house.getHousehold();

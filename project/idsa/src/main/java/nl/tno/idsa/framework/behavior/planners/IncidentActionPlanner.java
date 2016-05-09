@@ -354,7 +354,7 @@ public class IncidentActionPlanner {
         DebugPrinter.println("Suitable move actions: %s.", TextUtils.classNamesToString(suitableActions));
 
         Action chosenAction = null;
-        Collections.shuffle(suitableActions); // TODO Replace by RandomNumber... call.
+        Collections.shuffle(suitableActions, RandomNumber.getRandom());
         for (Action moveCandidate : suitableActions) {
             if (moveCandidate.getTargetRoleAfter() == null) {
                 chosenAction = moveCandidate;

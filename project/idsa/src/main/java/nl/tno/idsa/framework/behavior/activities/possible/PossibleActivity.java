@@ -1,5 +1,6 @@
 package nl.tno.idsa.framework.behavior.activities.possible;
 
+import nl.tno.idsa.Constants;
 import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.behavior.activities.concrete.Activity;
 import nl.tno.idsa.framework.behavior.activities.concrete.BasicMovementActivity;
@@ -17,9 +18,6 @@ import java.util.*;
  * Base class for all possible activities. These describe the constraints for activities.
  */
 public abstract class PossibleActivity implements Comparable<PossibleActivity> {
-
-    // TODO This is a setting (the maximum travel time).
-    private static final int MAX_WALKING_TIME_S = 1200;
 
     private final Class<? extends LocationFunction>[] possibleLocationFunctions;
     private final PossibleTimeIntervals possibleTimeIntervals;
@@ -405,7 +403,7 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
         ClosestFirstIterator iterator = world.getClosestFirstIterator(locationPreviousActivity);
 
         // The last condition is a terminator.
-        while (iterator.hasNext() && suitableLocation == null && totalWalkingTimeS < MAX_WALKING_TIME_S && timeWindowInMinutes - Math.ceil(totalWalkingTimeS / 60) >= getMinimalDurationInMinutes()) {
+        while (iterator.hasNext() && suitableLocation == null && totalWalkingTimeS < Constants.MAX_WALKING_TIME_S && timeWindowInMinutes - Math.ceil(totalWalkingTimeS / 60) >= getMinimalDurationInMinutes()) {
 
             // Determine whether the location is suitable.
             Vertex candidateLocation = iterator.next();
