@@ -157,6 +157,22 @@ public class SeasonSettingDialog extends JDialog {
         return cancelled;
     }
 
+    public ISeason getSelectedSeason() {
+        return selectedSeason;
+    }
+
+    public ITimeOfYear getSelectedTimeOfYear() {
+        return selectedTimeOfYear;
+    }
+
+    public DayOfWeek getSelectedDayOfWeek() {
+        return selectedDayOfWeek;
+    }
+
+    public Time getSelectedTime() {
+        return selectedTime;
+    }
+
     public Environment createEnvironmentWithSettings(World world) {
         return new Environment(world, selectedSeason, selectedTimeOfYear, selectedDayOfWeek.getPrototypeDay(), selectedTime);
     }

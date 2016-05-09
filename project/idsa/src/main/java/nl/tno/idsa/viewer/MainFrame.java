@@ -161,6 +161,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
             @Override
             public void actionPerformed(ActionEvent e) {
                 SeasonSettingDialog seasonSettingDialog = new SeasonSettingDialog(mapFrame, env);  // The dialog decides whether it must be visible.
+                timeChanged(seasonSettingDialog.getSelectedTime());
             }
         });
         setSeasonButton.setFocusPainted(false);
