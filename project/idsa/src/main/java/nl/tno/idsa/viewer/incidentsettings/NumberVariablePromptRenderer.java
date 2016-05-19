@@ -1,14 +1,14 @@
-package nl.tno.idsa.viewer.eventsettings;
+package nl.tno.idsa.viewer.incidentsettings;
 
 import nl.tno.idsa.framework.semantics_impl.variables.Variable;
+import nl.tno.idsa.viewer.components.PromptRenderer;
 
 import javax.swing.*;
 
 /**
- * Created by jongsd on 3-9-15.
+ * Superclass for prompt renderers for numbers.
  */
-// TODO Document class.
-public abstract class NumberVariablePromptRenderer<N extends Number> implements EventParameterRendererComponent<Number> {
+public abstract class NumberVariablePromptRenderer<N extends Number> implements PromptRenderer<Number> {
 
     private final String variableDescription;
     private final Variable<N> variable;

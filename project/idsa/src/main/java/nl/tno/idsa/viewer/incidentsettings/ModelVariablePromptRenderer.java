@@ -1,17 +1,17 @@
-package nl.tno.idsa.viewer.eventsettings;
+package nl.tno.idsa.viewer.incidentsettings;
 
 import nl.tno.idsa.framework.behavior.models.Model;
 import nl.tno.idsa.framework.semantics_impl.variables.Variable;
 import nl.tno.idsa.framework.utils.TextUtils;
+import nl.tno.idsa.viewer.components.PromptRenderer;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by jongsd on 3-9-15.
+ * A renderer for selecting a model.
  */
-// TODO Document class.
-public class ModelVariablePromptRenderer implements EventParameterRendererComponent<Class<? extends Model>> {
+public class ModelVariablePromptRenderer implements PromptRenderer<Class<? extends Model>> {
 
     private final String variableDescription;
     private final Variable<Class<? extends Model>> variable;

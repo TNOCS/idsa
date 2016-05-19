@@ -1,11 +1,10 @@
-package nl.tno.idsa.viewer.eventsettings;
+package nl.tno.idsa.viewer.incidentsettings;
 
 import nl.tno.idsa.framework.semantics_impl.variables.Variable;
 
 /**
- * Created by jongsd on 17-9-15.
+ * Prompt for integer variables.
  */
-// TODO Document class.
 public class IntegerVariablePromptRenderer extends NumberVariablePromptRenderer<Integer> {
 
     public IntegerVariablePromptRenderer(String variableDescription, Variable<Integer> variable) {

@@ -6,9 +6,8 @@ import nl.tno.idsa.library.locations.*;
 import java.awt.*;
 
 /**
- * @author smelikrm
+ * Utility to give areas a color given their current status.
  */
-// TODO Document class.
 public class AreaColorUtil {
     private static final Color water = new Color(0x80b1d3);
     private static final Color vegetation = new Color(0xb3de69);
@@ -18,7 +17,7 @@ public class AreaColorUtil {
     private static final Color work = new Color(0xfdb462);
 
     public static Color getAreaColor(Area a) {
-        // TODO finish with a nice color palette
+        // TODO Improve: use a nice color palette.
         Color result = Color.LIGHT_GRAY;
         if (a.hasFunction(Water.class)) {
             result = water;

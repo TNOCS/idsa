@@ -5,8 +5,7 @@ package nl.tno.idsa.framework.messaging;
  */
 public interface IProgressObserver {
     public void notifyShowProgress(boolean showProgress);
-
     public void notifyProgress(double percentage);
-
+    public void notifyUnknownProgress();
     public void notifyProgressMessage(String message);
 }

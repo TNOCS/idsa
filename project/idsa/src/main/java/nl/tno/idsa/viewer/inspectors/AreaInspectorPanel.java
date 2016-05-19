@@ -4,9 +4,9 @@ import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.behavior.incidents.Incident;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
 import nl.tno.idsa.framework.semantics_impl.locations.LocationFunction;
-import nl.tno.idsa.framework.simulator.Sim;
-import nl.tno.idsa.viewer.SelectionObserver;
+import nl.tno.idsa.framework.world.Environment;
 import nl.tno.idsa.viewer.components.SimpleGridBagPanel;
+import nl.tno.idsa.viewer.observers.SelectionObserver;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -24,17 +24,19 @@ import java.util.Vector;
 public class AreaInspectorPanel extends InspectorPanel implements Observer {
 
     private final SelectionObserver selectionObserver;
+    private Environment environment;
     private nl.tno.idsa.framework.world.Area area;
 
     private Stack<nl.tno.idsa.framework.world.Area> previousAreas = new Stack<>();
-    protected JButton btnPreviousArea;
+    private JButton btnPreviousArea;
 
     private JLabel areaType;
     private JList<LocationFunction> locationFunctionList;
     private JList<Agent> agentsInAreaList;
 
-    public AreaInspectorPanel(SelectionObserver selectionObserver) {
+    public AreaInspectorPanel(SelectionObserver selectionObserver, Environment environment) {
         super(Side.RIGHT);
+        this.environment = environment;
         setBorder(null);
 
         this.selectionObserver = selectionObserver;
@@ -152,10 +154,8 @@ public class AreaInspectorPanel extends InspectorPanel implements Observer {
             areaType.setText(area.getType());
         }
 
-        // TODO How can we implement this? Areas would need to know the environment they are in.
         if (area != null) {
-            // TODO avoid singleton access
-            java.util.Vector<Agent> agents = Sim.getInstance().getEnvironment().getAgentsIn(area);
+            java.util.Vector<Agent> agents = environment.getAgentsIn(area);
             agentsInAreaList.setListData(agents);
         } else {
             agentsInAreaList.setListData(new Agent[]{});

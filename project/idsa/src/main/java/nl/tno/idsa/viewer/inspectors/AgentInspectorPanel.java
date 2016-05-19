@@ -4,8 +4,8 @@ import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.behavior.activities.concrete.Activity;
 import nl.tno.idsa.framework.behavior.incidents.Incident;
 import nl.tno.idsa.framework.utils.TextUtils;
-import nl.tno.idsa.viewer.SelectionObserver;
 import nl.tno.idsa.viewer.components.SimpleGridBagPanel;
+import nl.tno.idsa.viewer.observers.SelectionObserver;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;

@@ -51,5 +51,11 @@ public class Constants {
      * of agents (picked randomly) with agendas, instead of all agents. Set this to Integer.MAX_VALUE if you
      * do not want to limit the number of agendas created.
      */
-    public final static int MAX_AGENTS_WITH_AGENDAS = 10; //Integer.MAX_VALUE;
+    public final static int MAX_AGENTS_WITH_AGENDAS = Integer.MAX_VALUE;
+
+    /** Whether the map view visually declutters agents. */
+    public static final boolean GUI_DECLUTTER_AGENTS = false;
+
+    /** Size in pixels at 100% zoom level of agents in the map view.*/
+    public static final double GUI_AGENT_ICON_SIZE = 4.0;
 }

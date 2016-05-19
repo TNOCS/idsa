@@ -5,9 +5,9 @@ import nl.tno.idsa.framework.behavior.incidents.Incident;
 import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.semantics_impl.actions.Action;
 import nl.tno.idsa.framework.world.Time;
-import nl.tno.idsa.viewer.SelectionObserver;
 import nl.tno.idsa.viewer.components.SimpleGridBagPanel;
 import nl.tno.idsa.viewer.observers.RunningIncidentsObserver;
+import nl.tno.idsa.viewer.observers.SelectionObserver;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;

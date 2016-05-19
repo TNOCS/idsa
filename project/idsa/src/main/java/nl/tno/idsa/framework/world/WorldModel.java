@@ -1,9 +1,10 @@
 package nl.tno.idsa.framework.world;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.opengis.feature.Feature;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class WorldModel {
 

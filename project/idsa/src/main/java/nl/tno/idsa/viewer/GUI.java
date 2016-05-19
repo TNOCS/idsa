@@ -1,9 +1,11 @@
 package nl.tno.idsa.viewer;
 
+import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.messaging.Messenger;
 import nl.tno.idsa.framework.messaging.ProgressNotifier;
 import nl.tno.idsa.framework.population.PopulationGenerator;
 import nl.tno.idsa.framework.simulator.Sim;
+import nl.tno.idsa.framework.utils.DataFinder;
 import nl.tno.idsa.framework.utils.RandomNumber;
 import nl.tno.idsa.framework.world.Environment;
 import nl.tno.idsa.framework.world.Vertex;
@@ -15,6 +17,8 @@ import nl.tno.idsa.library.world.WorldModelNL;
 import nl.tno.idsa.viewer.components.ProgressDialog;
 import nl.tno.idsa.viewer.dialogs.SeasonSettingDialog;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO Document class. Mark it as the main class.
@@ -32,40 +36,40 @@ public class GUI {
         ProgressNotifier.notifyShowProgress(true);
         ProgressNotifier.notifyProgressMessage("Loading world data...");
 
-        World world = WorldGenerator.generateWorld(new WorldModelNL(), "../../data/nl/idsa_nav_network_pedestrian.shp", "../../data/nl/idsa_pand_osm_a_utm31n.shp", "../../data/nl/idsa_public_areas_a_utm31n.shp", "../../data/nl/idsa_vbo_utm31n.shp", "../../data/nl/idsa_pand_p_utm31n.shp");
+        String path = DataFinder.pickDataSource();
+
+        if (path == null) {
+            System.out.println("No data files were found, exiting.");
+            return;
+        }
+
+        World world = WorldGenerator.generateWorld(new WorldModelNL(),
+                path + "/idsa_nav_network_pedestrian.shp",
+                path + "/idsa_pand_osm_a_utm31n.shp",
+                path + "/idsa_public_areas_a_utm31n.shp",
+                path + "/idsa_vbo_utm31n.shp",
+                path + "/idsa_pand_p_utm31n.shp");
 
         SeasonSettingDialog ssd = new SeasonSettingDialog(null, null);
         if (ssd.isCancelled()) {
             return;
         }
 
+        ProgressNotifier.notifyProgressMessage("Creating environment...");
         Environment env = ssd.createEnvironmentWithSettings(world);
 
-        ProgressNotifier.notifyProgressMessage("Creating environment...");
-
-//        Environment env;
-//        // Sunday 11:00 Summer
-//        // env = new Environment(world, new Summer(), null, new Day(14, 6, 2015), new Time(11, 0, 0));
-//        // Sunday 11:00 Winter
-//        // env = new Environment(world, new Winter(), null, new Day(16, 11, 2015), new Time(11, 0, 0));
-//        // Monday 11:00
-//        // env = new Environment(world, new Winter(), null, new Day(21, 9, 2015), new Time(11, 0, 0));
-//        // Monday 17:00
-//        // env = new Environment(world, new Winter(), null, new Day(21, 9, 2015), new Time(17, 0, 0));
-//        // Monday 11:00
-//        // env = new Environment(world, new Winter(), null, new Day(21, 9, 2015), new Time(11, 0, 0));
-//        // Saturday 11:00
-//        env = new Environment(world, new Winter(), null, new Day(26, 9, 2015), new Time(12, 0, 0));
-
+        ProgressNotifier.notifyProgressMessage("Creating population...");
+        ProgressNotifier.notifyUnknownProgress();
         PopulationGenerator populationGenerator = new PopulationGenerator(env, new PopulationDataNL());
-        ProgressNotifier.notifyProgress(15);
-        env.setPopulation(populationGenerator.generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp")); // TODO Hardcoded input file.
-        ProgressNotifier.notifyProgress(85);
+        List<Agent> population = populationGenerator.generatePopulation(path + "/idsa_cbs_buurten_utm31n.shp");
+        env.setPopulation(population);
+
+        ProgressNotifier.notifyProgressMessage("Creating agendas if needed...");
         env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), makeAgendas);
 
         // Add some police stations, randomly, as they are not in the world yet.
         // TODO Create police stations in the world.
-        System.out.println("Enriching environment...");
+        ProgressNotifier.notifyProgressMessage("Enriching environment...");
         List<Vertex> vertices = world.getVertices();
         int changedVertices = 0;
         while (changedVertices < 50) {
@@ -81,15 +85,19 @@ public class GUI {
         ProgressNotifier.notifyShowProgress(false);
         ProgressNotifier.removeObserver(progressDialog);
 
+        // Create sim
+        Sim sim = Sim.getInstance();
+        sim.init(env);
+
         // Open the viewer
         System.out.println("Creating viewer...");
-        MainFrame mf = new MainFrame(env);
+        MainFrame mf = new MainFrame(sim);
         mf.show();
 
         // Start the sim
         System.out.println("Starting simulator...");
-        Sim.getInstance().setXRealTime(30);
-        Sim.getInstance().start();
+        sim.setXRealTime(30);
+        sim.start();
     }
 }
 

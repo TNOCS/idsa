@@ -1,4 +1,4 @@
-package nl.tno.idsa.viewer.eventsettings;
+package nl.tno.idsa.viewer.incidentsettings;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
 import nl.tno.idsa.framework.semantics_base.JavaSubclassFinder;
@@ -16,9 +16,8 @@ import java.util.Set;
 import java.util.Vector;
 
 /**
- * Created by jongsd on 3-9-15.
+ * Show all incidents in the library so the user can select one.
  */
-// TODO Document class.
 public class IncidentSelectorDialog extends JDialog {
 
     private final World world;
@@ -38,7 +37,7 @@ public class IncidentSelectorDialog extends JDialog {
         contentPane.setBorder(new EmptyBorder(3, 3, 3, 3));
         setContentPane(contentPane);
 
-        Vector<Incident> incidents = listEvents();
+        Vector<Incident> incidents = listIncidents();
         if (incidents.size() == 0) {
             JOptionPane.showMessageDialog(parent, "No incidents found", "Error", JOptionPane.ERROR_MESSAGE);
             selectedIncident = null;
@@ -60,7 +59,7 @@ public class IncidentSelectorDialog extends JDialog {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 3, 3));
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
-        JButton okButton = new JButton(new AbstractAction("Insert") {
+        JButton okButton = new JButton(new AbstractAction("Inject") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 selectedIncident = incidentList.getSelectedValue();
@@ -85,12 +84,12 @@ public class IncidentSelectorDialog extends JDialog {
     }
 
     @SuppressWarnings("unchecked")
-    private Vector<Incident> listEvents() {
-        Set<Class<? extends Incident>> eventClasses = JavaSubclassFinder.listSubclasses(Incident.class);
+    private Vector<Incident> listIncidents() {
+        Set<Class<? extends Incident>> incidentClasses = JavaSubclassFinder.listSubclasses(Incident.class);
         Vector<Incident> incidents = new Vector<Incident>();
-        for (Class<? extends Incident> eventClass : eventClasses) {
+        for (Class<? extends Incident> incidentClass : incidentClasses) {
             Constructor<? extends Incident> constructor = null;
-            Constructor[] allConstructors = eventClass.getDeclaredConstructors();
+            Constructor[] allConstructors = incidentClass.getDeclaredConstructors();
             for (Constructor ctor : allConstructors) {
                 Class<?>[] pType = ctor.getParameterTypes();
                 if (pType.length == 1 && pType[0].equals(World.class)) {
@@ -103,7 +102,8 @@ public class IncidentSelectorDialog extends JDialog {
                     Incident newIncident = constructor.newInstance(world);
                     incidents.add(newIncident);
                 } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                    // Should not happen!   TODO Gracefully report a broken event.
+                    // Should not happen!
+                    // TODO Improve. Gracefully report a broken incident.
                     ex.printStackTrace();
                 }
             }

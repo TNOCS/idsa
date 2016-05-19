@@ -1,18 +1,18 @@
-package nl.tno.idsa.viewer.eventsettings;
+package nl.tno.idsa.viewer.incidentsettings;
 
 import nl.tno.idsa.framework.semantics_impl.locations.LocationAndTime;
 import nl.tno.idsa.framework.semantics_impl.variables.LocationVariable;
 import nl.tno.idsa.framework.world.IGeometry;
 import nl.tno.idsa.framework.world.Time;
+import nl.tno.idsa.viewer.components.PromptRenderer;
 import nl.tno.idsa.viewer.components.TimeSetterPanel;
 
 import javax.swing.*;
 
 /**
- * Created by jongsd on 3-9-15.
+ * Prompt for a location variable.
  */
-// TODO Document class.
-public class LocationVariablePromptRenderer implements EventParameterRendererComponent<LocationAndTime> {
+public class LocationVariablePromptRenderer implements PromptRenderer<LocationAndTime> {
 
     private final String variableDescription;
     private final LocationVariable variable;

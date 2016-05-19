@@ -13,6 +13,7 @@ import nl.tno.idsa.framework.semantics_impl.variables.IntegerVariable;
 import nl.tno.idsa.framework.semantics_impl.variables.LocationVariable;
 import nl.tno.idsa.framework.semantics_impl.variables.RoleVariable;
 import nl.tno.idsa.framework.semantics_impl.variables.Variable;
+import nl.tno.idsa.framework.simulator.Sim;
 import nl.tno.idsa.framework.utils.RandomNumber;
 import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.library.incidents.IncidentArrestAfterOffense;
@@ -80,6 +81,8 @@ public class TestSamplerQuality {
         env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), true);
         Messenger.setEnvironment(env);
         Messenger.enableMirrorToConsole(true);
+        Sim sim = Sim.getInstance();
+        sim.init(env);
 
         // Add some police spawn points.
         List<Vertex> vertices = world.getVertices();
@@ -189,7 +192,7 @@ public class TestSamplerQuality {
                 }
 
                 if (showErrors && countFailwindows < 2) {
-                    MainFrame mf = new MainFrame(env);
+                    MainFrame mf = new MainFrame(sim);
                     mf.show();
                     mf.visualizePlan(plan);
                     countFailwindows++;

@@ -1,16 +1,16 @@
-package nl.tno.idsa.viewer.eventsettings;
+package nl.tno.idsa.viewer.incidentsettings;
 
 import nl.tno.idsa.framework.semantics_impl.variables.Variable;
 import nl.tno.idsa.framework.utils.TextUtils;
+import nl.tno.idsa.viewer.components.PromptRenderer;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by jongsd on 3-9-15.
+ * Class variable prompt.
  */
-// TODO Document class.
-public class ClassVariablePromptRenderer implements EventParameterRendererComponent<Class> {
+public class ClassVariablePromptRenderer implements PromptRenderer<Class> {
 
     private final String variableDescription;
     private final Variable<Class> variable;

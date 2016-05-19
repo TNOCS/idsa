@@ -31,7 +31,12 @@ public class ProgressNotifier {
         for (IProgressObserver observer : observers) {
             observer.notifyProgress(percentage);
         }
+    }
 
+    public static void notifyUnknownProgress() {
+        for (IProgressObserver observer : observers) {
+            observer.notifyUnknownProgress();
+        }
     }
 
     public static void notifyProgressMessage(String message) {

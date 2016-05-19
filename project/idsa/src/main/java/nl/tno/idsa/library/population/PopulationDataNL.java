@@ -1,12 +1,13 @@
 package nl.tno.idsa.library.population;
 
+import nl.tno.idsa.framework.population.Gender;
+import nl.tno.idsa.framework.population.HouseholdTypes;
+import nl.tno.idsa.framework.population.PopulationData;
+
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import nl.tno.idsa.framework.population.Gender;
-import nl.tno.idsa.framework.population.HouseholdTypes;
-import nl.tno.idsa.framework.population.PopulationData;
 
 public class PopulationDataNL extends PopulationData {
     public PopulationDataNL() {

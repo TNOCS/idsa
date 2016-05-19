@@ -53,11 +53,22 @@ public class ProgressDialog extends JDialog implements IProgressObserver {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                progressBar.setIndeterminate(false);
                 int newValue = (int) (100 * percentage);
                 if (progressBar.getValue() != newValue) {
                     progressBar.setValue(newValue);
                     progressBar.invalidate();
                 }
+            }
+        });
+    }
+
+    @Override
+    public void notifyUnknownProgress() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setIndeterminate(true);
             }
         });
     }

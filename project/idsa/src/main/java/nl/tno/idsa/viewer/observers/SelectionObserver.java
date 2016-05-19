@@ -1,4 +1,4 @@
-package nl.tno.idsa.viewer;
+package nl.tno.idsa.viewer.observers;
 
 import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.behavior.incidents.Incident;
@@ -9,9 +9,8 @@ import java.util.List;
 import java.util.Observable;
 
 /**
- * @author smelikrm
+ * Observer for selections in the GUI.
  */
-// TODO Document class.
 public class SelectionObserver extends Observable {
 
     private final List<Agent> agents;

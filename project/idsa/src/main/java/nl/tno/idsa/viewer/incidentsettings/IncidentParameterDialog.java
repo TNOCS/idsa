@@ -1,10 +1,11 @@
-package nl.tno.idsa.viewer.eventsettings;
+package nl.tno.idsa.viewer.incidentsettings;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
 import nl.tno.idsa.framework.semantics_impl.variables.LocationVariable;
 import nl.tno.idsa.framework.semantics_impl.variables.Variable;
 import nl.tno.idsa.framework.world.Environment;
+import nl.tno.idsa.viewer.components.PromptRenderer;
 import nl.tno.idsa.viewer.components.TimeSetterPanel;
 
 import javax.swing.*;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by jongsd on 3-9-15.
+ * Show a dialog in which the user can set the parameters of an incident.
  */
 // TODO Document class.
 public class IncidentParameterDialog extends JDialog {
@@ -30,7 +31,7 @@ public class IncidentParameterDialog extends JDialog {
 
     private IncidentParameterDialog me = this;
     private Incident selectedIncident;
-    private Map<Variable, EventParameterRendererComponent> componentMap = new HashMap<>();
+    private Map<Variable, PromptRenderer> componentMap = new HashMap<>();
 
     public IncidentParameterDialog(final Frame parent, final Incident incident, final Environment environment) {
 
@@ -61,7 +62,7 @@ public class IncidentParameterDialog extends JDialog {
                 continue;
             }
             Variable variable = parameters.get(parameterId);
-            EventParameterRendererComponent renderer = VariablePromptRendererFactory.getInstance().getRenderer(parameterId + "", variable); // TODO Better string representation of parameter.
+            PromptRenderer renderer = VariablePromptRendererFactory.getInstance().getRenderer(parameterId + "", variable); // TODO Improve. Show a nicer string representation of parameter.
             if (renderer != null) {
                 labelPanel.add(renderer.getLabelComponent());
                 promptPanel.add(renderer.getUserInputComponent());
@@ -73,7 +74,7 @@ public class IncidentParameterDialog extends JDialog {
         }
 
         labelPanel.add(new JLabel("Time of incident"));
-        final TimeSetterPanel timeSetterPanel = new TimeSetterPanel(environment.getTime().incrementByMinutes(10)); // TODO Set some default in a different way than using a magic constant.
+        final TimeSetterPanel timeSetterPanel = new TimeSetterPanel(environment.getTime().incrementByMinutes(10)); // TODO Improve. Set some default incident delay in a different way than using a magic constant.
         promptPanel.add(timeSetterPanel);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 3, 3));
@@ -86,8 +87,8 @@ public class IncidentParameterDialog extends JDialog {
             public void actionPerformed(ActionEvent e) {
 
                 for (Variable v : componentMap.keySet()) {
-                    EventParameterRendererComponent eventParameterRendererComponent = componentMap.get(v);
-                    v.setValue(eventParameterRendererComponent.getValue());
+                    PromptRenderer promptRenderer = componentMap.get(v);
+                    v.setValue(promptRenderer.getValue());
                 }
 
                 LocationVariable lv = (LocationVariable) selectedIncident.getParameters().get(Incident.Parameters.LOCATION_VARIABLE);

@@ -1,11 +1,11 @@
-package nl.tno.idsa.viewer.eventsettings;
+package nl.tno.idsa.viewer.incidentsettings;
 
 import nl.tno.idsa.framework.semantics_impl.variables.*;
+import nl.tno.idsa.viewer.components.PromptRenderer;
 
 /**
- * Created by jongsd on 3-9-15.
+ * Create prompt renderers.
  */
-// TODO Document class.
 public class VariablePromptRendererFactory {
 
     private static final VariablePromptRendererFactory instance = new VariablePromptRendererFactory();
@@ -15,7 +15,7 @@ public class VariablePromptRendererFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public EventParameterRendererComponent getRenderer(String variableDescription, Variable variable) {
+    public PromptRenderer getRenderer(String variableDescription, Variable variable) {
         if (variable instanceof IntegerVariable) {
             return new IntegerVariablePromptRenderer(variableDescription, (IntegerVariable) variable);
         } else if (variable instanceof DoubleVariable) {

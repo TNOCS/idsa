@@ -129,9 +129,6 @@ public class SeasonSettingDialog extends JDialog {
                     selectedTimeOfYear = null;
                 }
                 selectedTime = timeSetterPanel.getValue();
-
-                System.out.println(selectedSeason + " " + selectedTimeOfYear + " " + selectedDayOfWeek + " " + selectedTime);
-
                 applySettingsTo(environment);
                 dispose();
             }

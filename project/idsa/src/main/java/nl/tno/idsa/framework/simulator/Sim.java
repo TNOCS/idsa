@@ -6,14 +6,13 @@ import nl.tno.idsa.framework.world.Time;
 
 import java.util.List;
 
-// TODO Document code.
-
+/**
+ * Main simulator loop code.
+ */
 public class Sim {
 
     private static final double SIM_HERTZ = 5;  // TODO Somehow the sim clock rate needs to be adaptive so slower systems or bigger environments get run at the right real time factor and not slower.
     private static final long TIME_BETWEEN_UPDATES = (long) (Time.NANO_SECOND / SIM_HERTZ);
-
-    private static Sim theSim;
 
     private Environment env;
 
@@ -25,15 +24,19 @@ public class Sim {
     private boolean isPaused;
     private boolean isRunning;
 
+    private static Sim instance;
+
     public static Sim getInstance() {
-        if (theSim == null) {
-            theSim = new Sim();
+        if (instance == null) {
+            instance = new Sim();
         }
-        return theSim;
+        return instance;
     }
 
     public void init(Environment env) {
-        Messenger.setEnvironment(env);
+
+        Messenger.setEnvironment(env); // TODO FIXME Ugly static reference.
+
         this.env = env;
         this.done = false;
         this.isRunning = false;

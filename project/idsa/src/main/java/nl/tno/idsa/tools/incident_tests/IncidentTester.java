@@ -53,9 +53,10 @@ public abstract class IncidentTester {
         System.out.println("\n\nFINAL PLAN:\n" + plan.toString());
 
         // STEP 5. START THE SIM.
-        Sim.getInstance().init(env);
-        Sim.getInstance().setXRealTime(100);
-        Sim.getInstance().start();
+        Sim sim = Sim.getInstance();
+        sim.init(env);
+        sim.setXRealTime(100);
+        sim.start();
     }
 
     /**

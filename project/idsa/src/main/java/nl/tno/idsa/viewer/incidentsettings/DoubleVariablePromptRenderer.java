@@ -1,11 +1,10 @@
-package nl.tno.idsa.viewer.eventsettings;
+package nl.tno.idsa.viewer.incidentsettings;
 
 import nl.tno.idsa.framework.semantics_impl.variables.Variable;
 
 /**
- * Created by jongsd on 17-9-15.
+ * Double variable prompt.
  */
-// TODO Document class.
 public class DoubleVariablePromptRenderer extends NumberVariablePromptRenderer<Double> {
 
     public DoubleVariablePromptRenderer(String variableDescription, Variable<Double> variable) {
