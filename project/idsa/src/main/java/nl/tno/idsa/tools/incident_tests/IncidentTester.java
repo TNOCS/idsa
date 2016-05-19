@@ -27,8 +27,6 @@ public abstract class IncidentTester {
         Environment env = new Environment(world, new Day(21, 9, 2015), new Time(12, 0, 0));
         env.setPopulation(new PopulationGenerator(env, new PopulationDataNL()).generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp"));
         env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), true);
-        Messenger.setEnvironment(env);
-        Messenger.enableMirrorToConsole(true);
 
         // STEP 1. CREATE INCIDENT.
         Incident incident = createIncident(env);
@@ -54,8 +52,9 @@ public abstract class IncidentTester {
 
         // STEP 5. START THE SIM.
         Sim sim = Sim.getInstance();
+        Messenger.enableMirrorToConsole(true); // Logging enabled.
         sim.init(env);
-        sim.setXRealTime(100);
+        sim.setMaxXRealTime(100);
         sim.start();
     }
 

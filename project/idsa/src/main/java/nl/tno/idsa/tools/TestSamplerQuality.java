@@ -14,6 +14,7 @@ import nl.tno.idsa.framework.semantics_impl.variables.LocationVariable;
 import nl.tno.idsa.framework.semantics_impl.variables.RoleVariable;
 import nl.tno.idsa.framework.semantics_impl.variables.Variable;
 import nl.tno.idsa.framework.simulator.Sim;
+import nl.tno.idsa.framework.utils.DataFinder;
 import nl.tno.idsa.framework.utils.RandomNumber;
 import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.library.incidents.IncidentArrestAfterOffense;
@@ -75,14 +76,27 @@ public class TestSamplerQuality {
     public static void main(String[] args) throws Exception {
 
         //Create world. TODO Hardcoded input.
-        World world = WorldGenerator.generateWorld(new WorldModelNL(), "../../data/nl/idsa_nav_network_pedestrian.shp", "../../data/nl/idsa_pand_osm_a_utm31n.shp", "../../data/nl/idsa_public_areas_a_utm31n.shp", "../../data/nl/idsa_vbo_utm31n.shp", "../../data/nl/idsa_pand_p_utm31n.shp");
+
+        String path = DataFinder.pickDataSource();
+
+        if (path == null) {
+            System.out.println("No data files were found, exiting.");
+            return;
+        }
+
+        World world = WorldGenerator.generateWorld(new WorldModelNL(), // TODO World model NL is hardcoded.
+                path + "/idsa_nav_network_pedestrian.shp",
+                path + "/idsa_pand_osm_a_utm31n.shp",
+                path + "/idsa_public_areas_a_utm31n.shp",
+                path + "/idsa_vbo_utm31n.shp",
+                path + "/idsa_pand_p_utm31n.shp");
+
         Environment env = new Environment(world, new Day(21, 9, 2015), new Time(10, 0, 0)); //there are people on the streets at this time.
         env.setPopulation(new PopulationGenerator(env, new PopulationDataNL()).generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp"));
         env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), true);
-        Messenger.setEnvironment(env);
-        Messenger.enableMirrorToConsole(true);
         Sim sim = Sim.getInstance();
         sim.init(env);
+        Messenger.enableMirrorToConsole(true);
 
         // Add some police spawn points.
         List<Vertex> vertices = world.getVertices();

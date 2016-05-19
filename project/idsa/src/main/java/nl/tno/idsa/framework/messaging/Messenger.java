@@ -1,6 +1,7 @@
 package nl.tno.idsa.framework.messaging;
 
 import nl.tno.idsa.framework.agents.Agent;
+import nl.tno.idsa.framework.simulator.Sim;
 import nl.tno.idsa.framework.world.Environment;
 
 import java.util.ArrayList;
@@ -11,14 +12,9 @@ import java.util.List;
  */
 public class Messenger {
 
-    private static Environment environment;
     private static List<IMessageObserver> receivers;
 
     private static ConsoleMessagePrinter consoleMessagePrinter;
-
-    public static void setEnvironment(Environment environment) {
-        Messenger.environment = environment;
-    }
 
     public static void enableMirrorToConsole(boolean value) {
         if (value) {
@@ -47,6 +43,7 @@ public class Messenger {
     }
 
     public static void broadcast(String status) {
+        Environment environment = Sim.getInstance().getEnvironment();
         String time = environment != null ? "" + environment.getTime() : "?";
         String message = String.format("[%s] %s", time, status);
         if (receivers != null) {

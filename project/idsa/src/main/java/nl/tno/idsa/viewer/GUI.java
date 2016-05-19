@@ -42,7 +42,7 @@ public class GUI {
             return;
         }
 
-        World world = WorldGenerator.generateWorld(new WorldModelNL(),
+        World world = WorldGenerator.generateWorld(new WorldModelNL(),  // TODO World model NL is hardcoded.
                 path + "/idsa_nav_network_pedestrian.shp",
                 path + "/idsa_pand_osm_a_utm31n.shp",
                 path + "/idsa_public_areas_a_utm31n.shp",
@@ -95,7 +95,7 @@ public class GUI {
 
         // Start the sim
         System.out.println("Starting simulator...");
-        sim.setXRealTime(30);
+        sim.setMaxXRealTime(30);
         sim.start();
     }
 }

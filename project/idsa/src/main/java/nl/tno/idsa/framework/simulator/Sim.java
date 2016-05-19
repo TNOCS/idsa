@@ -9,24 +9,24 @@ import java.util.List;
 /**
  * Main simulator loop code.
  */
+// TODO Prefer if this is not a singleton. We could run multiple simulators, right?
 public class Sim {
 
-    // TODO Prefer if this is not a singleton. We could run multiple simulators, right?
+    private static Sim instance;
+
     // TODO Somehow the sim clock rate needs to be adaptive so slower systems or bigger environments get run at the right real time factor and not slower.
     private static final double SIM_HERTZ = 5;
     private static final long TIME_BETWEEN_UPDATES = (long) (Time.NANO_SECOND / SIM_HERTZ);
 
     private Environment env;
 
-    private double xRealTime = 10.0;
+    private double maxXRealTime = 10.0;
     private double actualXRealTime;
     private long simTime;
     private boolean done;
     private boolean requestPause;
     private boolean isPaused;
     private boolean isRunning;
-
-    private static Sim instance;
 
     public static Sim getInstance() {
         if (instance == null) {
@@ -36,13 +36,11 @@ public class Sim {
     }
 
     public void init(Environment env) {
-
-        Messenger.setEnvironment(env); // TODO FIXME Ugly static reference.
-
         this.env = env;
         this.done = false;
         this.isRunning = false;
         this.requestPause = false;
+
         // Sim time is incremental time since environment starting time
         this.simTime = 0;
     }
@@ -70,14 +68,14 @@ public class Sim {
 
     private void runFixedFrameRate() {
         this.isRunning = true;
-        System.out.format("\n[SIM] Events occur in %.1f x real-time%n", xRealTime);  // TODO To logger?
+        System.out.format("\n[SIM] Events occur in %.1f x real-time%n", maxXRealTime);  // TODO To logger?
         // Calculate real-time period of a frame, based on real-time factor
         long prev = System.nanoTime();
         // Last time update notification in real-time nano's
         long lastNotify = 0;
         long lastSimTime = 0;
-        this.actualXRealTime = xRealTime;
-        double frame = TIME_BETWEEN_UPDATES / this.xRealTime;
+        this.actualXRealTime = maxXRealTime;
+        double frame = TIME_BETWEEN_UPDATES / this.maxXRealTime;
         while (!done) {
             isPaused = false;
             long now = System.nanoTime();
@@ -155,13 +153,13 @@ public class Sim {
         return isRunning;
     }
 
-    public double getXRealTime() {
-        return xRealTime;
+    public double getMaxXRealTime() {
+        return maxXRealTime;
     }
 
-    public void setXRealTime(double xRealTime) {
-        System.out.println("[SIM] Real time factor set to " + xRealTime);  // TODO To logger.
-        this.xRealTime = xRealTime;
+    public void setMaxXRealTime(double maxXRealTime) {
+        System.out.println("[SIM] Maximum real time factor set to " + maxXRealTime);  // TODO Output to logger.
+        this.maxXRealTime = maxXRealTime;
     }
 
     public boolean isDone() {
