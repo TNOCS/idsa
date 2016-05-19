@@ -6,7 +6,7 @@ import nl.tno.idsa.framework.messaging.Messenger;
 import nl.tno.idsa.framework.messaging.ProgressNotifier;
 import nl.tno.idsa.framework.population.PopulationGenerator;
 import nl.tno.idsa.framework.simulator.Sim;
-import nl.tno.idsa.framework.utils.DataFinder;
+import nl.tno.idsa.framework.utils.DataSourceFinder;
 import nl.tno.idsa.framework.utils.RandomNumber;
 import nl.tno.idsa.framework.world.Environment;
 import nl.tno.idsa.framework.world.Vertex;
@@ -35,14 +35,16 @@ public class GUI {
         ProgressNotifier.notifyShowProgress(true);
         ProgressNotifier.notifyProgressMessage("Loading world data...");
 
-        String path = DataFinder.pickDataSource();
-
-        if (path == null) {
+        List<DataSourceFinder.DataSource> dataSources = DataSourceFinder.listDataSources();
+        if (dataSources.size() == 0) {
             System.out.println("No data files were found, exiting.");
             return;
         }
 
-        World world = WorldGenerator.generateWorld(new WorldModelNL(),  // TODO World model NL is hardcoded.
+        DataSourceFinder.DataSource dataSource = dataSources.get(0); // TODO We should let the user choose.
+        String path = dataSource.getPath();
+
+        World world = WorldGenerator.generateWorld(dataSource.getModel(),
                 path + "/idsa_nav_network_pedestrian.shp",
                 path + "/idsa_pand_osm_a_utm31n.shp",
                 path + "/idsa_public_areas_a_utm31n.shp",

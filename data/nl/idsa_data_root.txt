@@ -1,1 +1,2 @@
-Rijswijk, Zuid-Holland, Nederland, 2016.
+model=WorldModelNL
+description=Rijswijk, Zuid-Holland, Nederland, 2016.

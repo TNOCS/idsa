@@ -14,7 +14,7 @@ import nl.tno.idsa.framework.semantics_impl.variables.LocationVariable;
 import nl.tno.idsa.framework.semantics_impl.variables.RoleVariable;
 import nl.tno.idsa.framework.semantics_impl.variables.Variable;
 import nl.tno.idsa.framework.simulator.Sim;
-import nl.tno.idsa.framework.utils.DataFinder;
+import nl.tno.idsa.framework.utils.DataSourceFinder;
 import nl.tno.idsa.framework.utils.RandomNumber;
 import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.library.incidents.IncidentArrestAfterOffense;
@@ -75,16 +75,17 @@ public class TestSamplerQuality {
 
     public static void main(String[] args) throws Exception {
 
-        //Create world. TODO Hardcoded input.
-
-        String path = DataFinder.pickDataSource();
-
-        if (path == null) {
+        // Create world.
+        List<DataSourceFinder.DataSource> dataSources = DataSourceFinder.listDataSources();
+        if (dataSources.size() == 0) {
             System.out.println("No data files were found, exiting.");
             return;
         }
+        DataSourceFinder.DataSource dataSource = dataSources.get(0); // TODO We should let the user choose.
+        String path = dataSource.getPath();
 
-        World world = WorldGenerator.generateWorld(new WorldModelNL(), // TODO World model NL is hardcoded.
+        World world = WorldGenerator.generateWorld(dataSource.getModel(),
+
                 path + "/idsa_nav_network_pedestrian.shp",
                 path + "/idsa_pand_osm_a_utm31n.shp",
                 path + "/idsa_public_areas_a_utm31n.shp",
