@@ -111,7 +111,7 @@ public class AgendaPlanner {
             int current1 = current = current + 16;
             ProgressNotifier.notifyProgress(current1 / total);
             ProgressNotifier.notifyProgressMessage("Planning activities... Household " + ++h + " of " + households.size());
-            if (i++ > Constants.MAX_AGENTS_WITH_AGENDAS) {
+            if (i++ > Constants.AGENDA_MAX_AGENTS_WITH_AGENDAS) {
                 break;
             }
         }
@@ -126,7 +126,7 @@ public class AgendaPlanner {
             int current1 = current = current + 2;
             ProgressNotifier.notifyProgress(current1 / total);
             ProgressNotifier.notifyProgressMessage("Optimizing activities... Household " + ++h + " of " + households.size());
-            if (i++ > Constants.MAX_AGENTS_WITH_AGENDAS) {
+            if (i++ > Constants.AGENDA_MAX_AGENTS_WITH_AGENDAS) {
                 break;
             }
         }

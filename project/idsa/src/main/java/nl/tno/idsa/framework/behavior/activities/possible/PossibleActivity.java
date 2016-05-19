@@ -403,7 +403,7 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
         ClosestFirstIterator iterator = world.getClosestFirstIterator(locationPreviousActivity);
 
         // The last condition is a terminator.
-        while (iterator.hasNext() && suitableLocation == null && totalWalkingTimeS < Constants.MAX_WALKING_TIME_S && timeWindowInMinutes - Math.ceil(totalWalkingTimeS / 60) >= getMinimalDurationInMinutes()) {
+        while (iterator.hasNext() && suitableLocation == null && totalWalkingTimeS < Constants.AGENDA_MAX_WALKING_TIME_S && timeWindowInMinutes - Math.ceil(totalWalkingTimeS / 60) >= getMinimalDurationInMinutes()) {
 
             // Determine whether the location is suitable.
             Vertex candidateLocation = iterator.next();

@@ -1,5 +1,6 @@
 package nl.tno.idsa.viewer;
 
+import nl.tno.idsa.Constants;
 import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.messaging.Messenger;
 import nl.tno.idsa.framework.messaging.ProgressNotifier;
@@ -17,14 +18,12 @@ import nl.tno.idsa.library.world.WorldModelNL;
 import nl.tno.idsa.viewer.components.ProgressDialog;
 import nl.tno.idsa.viewer.dialogs.SeasonSettingDialog;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
-// TODO Document class. Mark it as the main class.
+/**
+ * Main entry point for the visual simulator.
+ * */
 public class GUI {
-
-    private static final boolean makeAgendas = true; // TODO This is a setting.
 
     public static void main(String[] args) throws Exception {
 
@@ -65,7 +64,7 @@ public class GUI {
         env.setPopulation(population);
 
         ProgressNotifier.notifyProgressMessage("Creating agendas if needed...");
-        env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), makeAgendas);
+        env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), Constants.AGENDA_ENABLED);
 
         // Add some police stations, randomly, as they are not in the world yet.
         // TODO Create police stations in the world.

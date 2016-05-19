@@ -45,7 +45,7 @@ public class Neighbourhood {
         // Before
         int currentTAE = expected.calculateTAE(current);
         System.out.println(neighbourhoodName + ": initial error: " + currentTAE);
-        for (int i = 0; i < Constants.NEIGHBORHOOD_OPTIMIZATION_ITERATIONS; ++i) {
+        for (int i = 0; i < Constants.POPULATION_NEIGHBORHOOD_OPTIMIZATION_ITERATIONS; ++i) {
             // Pick a random house to optimize
             House house = houses.get(RandomNumber.nextInt(houses.size()));
             Group houseHousehold = house.getHousehold();

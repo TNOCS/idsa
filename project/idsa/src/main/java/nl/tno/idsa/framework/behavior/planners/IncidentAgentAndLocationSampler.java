@@ -27,7 +27,7 @@ public class IncidentAgentAndLocationSampler {
 
         boolean planFound = false;
         int samplingIteration = 0;
-        while (samplingIteration < Constants.MAX_SAMPLE_ATTEMPTS && !planFound) {
+        while (samplingIteration < Constants.INCIDENT_MAX_SAMPLE_ATTEMPTS && !planFound) {
             samplingIteration++;
             // Initial random values
             try {
@@ -45,7 +45,7 @@ public class IncidentAgentAndLocationSampler {
             // Reselect one of the variables, shortening trip distances.
             int refiningIteration = 0;
             if (estimatedDuration > requiredDuration) {
-                while (estimatedDuration > requiredDuration && refiningIteration < Constants.MAX_REFINING_ITERATIONS) {
+                while (estimatedDuration > requiredDuration && refiningIteration < Constants.INCIDENT_MAX_REFINING_ITERATIONS) {
 
                     // Determine a restricting variable.
                     Variable var = plan.getRestrictingVariable(environment, true);
@@ -65,7 +65,7 @@ public class IncidentAgentAndLocationSampler {
                                 Point tgt = nextLocation.getValue().getLocation().getFirstPoint();
                                 if (!currentLocation.isRestrictedToAgentLocations()) {
                                     DebugPrinter.println("Location variable is not restricted to locations of agents.");
-                                    Vertex newLocVertex = environment.getWorld().sampleVertexCloserTo(currentLocation, tgt, Constants.CLOSER_SAMPLING_FACTOR_LOCATIONS);
+                                    Vertex newLocVertex = environment.getWorld().sampleVertexCloserTo(currentLocation, tgt, Constants.INCIDENT_CLOSER_SAMPLING_FACTOR_LOCATIONS);
                                     if (newLocVertex != null) {
                                         Point newLoc = newLocVertex.getPoint();
                                         if (newLoc != null) {
@@ -77,7 +77,7 @@ public class IncidentAgentAndLocationSampler {
                                     }
                                 } else {
                                     DebugPrinter.println("Location variable is restricted to locations of agents.");
-                                    List<Agent> agents = sampleAgentsCloserTo(environment.getAgents(), currentLocation.getAssociatedGroupVariable(), tgt, Constants.CLOSER_SAMPLING_FACTOR_GROUPS);
+                                    List<Agent> agents = sampleAgentsCloserTo(environment.getAgents(), currentLocation.getAssociatedGroupVariable(), tgt, Constants.INCIDENT_CLOSER_SAMPLING_FACTOR_GROUPS);
                                     if (agents != null && agents.size() > 0) {
                                         DebugPrinter.println("Found one or more agents that is/are closer to %s, namely %s.", nextLocation, agents);
                                         Agent agent = agents.get(0);   // This is an approximate, not all agents in the group may in fact be there.
@@ -98,7 +98,7 @@ public class IncidentAgentAndLocationSampler {
                                 LocationVariable firstLocation = plan.getFirstLocationInPlan(gv);
                                 if (firstLocation != null) {
                                     IGeometry tgt = firstLocation.getValue().getLocation();
-                                    List<Agent> newAgents = sampleAgentsCloserTo(environment.getAgents(), gv, tgt, Constants.CLOSER_SAMPLING_FACTOR_GROUPS); //TODO: perhaps: we have information on the slowest agent in the group from getRestrictingVariables.
+                                    List<Agent> newAgents = sampleAgentsCloserTo(environment.getAgents(), gv, tgt, Constants.INCIDENT_CLOSER_SAMPLING_FACTOR_GROUPS); //TODO: perhaps: we have information on the slowest agent in the group from getRestrictingVariables.
 
                                     // If enough agents have been found closer to the target
                                     if (newAgents.size() >= gv.getValue().size()) {

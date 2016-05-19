@@ -32,10 +32,10 @@ public class AgentSampler {
         int linearAgentIndex = -1;
         for (int i = 0; i < numAgents; ++i) {
             // Random search
-            if (numRandomSamples < Constants.MAX_RANDOM_AGENT_SAMPLES) {
+            if (numRandomSamples < Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES) {
                 boolean found = false;
-                while (!found && numRandomSamples < Constants.MAX_RANDOM_AGENT_SAMPLES) {
-                    int randomAgentIndex = agentFinder.findSuitableAgentUsingRandomSearch(selectedAgents, numRandomSamples, Constants.MAX_RANDOM_AGENT_SAMPLES);
+                while (!found && numRandomSamples < Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES) {
+                    int randomAgentIndex = agentFinder.findSuitableAgentUsingRandomSearch(selectedAgents, numRandomSamples, Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES);
                     if (randomAgentIndex >= 0) {
                         selectedAgents[i] = randomAgentIndex;
                         result.add(agents.get(randomAgentIndex));
