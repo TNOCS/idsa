@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Find usable data in the project path.
+ * Find usable environment data in the project path. Folders are identified by the presence of a token file
+ * entitled "idsa_data_root.txt". This could contain a description of the data.
  */
 // TODO For now, we traverse the directory tree upward, until we find a root from which data files are available. ...
 // We then immediately stop and return those data files. I.e. no further looking or scanning.
