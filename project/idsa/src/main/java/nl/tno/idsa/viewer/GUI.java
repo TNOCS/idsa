@@ -37,11 +37,11 @@ public class GUI {
 
         List<DataSourceFinder.DataSource> dataSources = DataSourceFinder.listDataSources();
         if (dataSources.size() == 0) {
-            System.out.println("No data files were found, exiting.");
+            System.out.println("No data sources were found, exiting.");
             return;
         }
 
-        DataSourceFinder.DataSource dataSource = dataSources.get(0); // TODO We should let the user choose.
+        DataSourceFinder.DataSource dataSource = dataSources.get(0); // TODO We should let the user choose. Create a dialog box to show if there are multiple options.
         String path = dataSource.getPath();
 
         World world = WorldGenerator.generateWorld(dataSource.getModel(),

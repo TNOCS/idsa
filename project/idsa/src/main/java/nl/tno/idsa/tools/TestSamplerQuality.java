@@ -81,7 +81,7 @@ public class TestSamplerQuality {
             System.out.println("No data files were found, exiting.");
             return;
         }
-        DataSourceFinder.DataSource dataSource = dataSources.get(0); // TODO We should let the user choose.
+        DataSourceFinder.DataSource dataSource = dataSources.get(0); // TODO We should let the user choose. Create a dialog box to show if there are multiple options.
         String path = dataSource.getPath();
 
         World world = WorldGenerator.generateWorld(dataSource.getModel(),
