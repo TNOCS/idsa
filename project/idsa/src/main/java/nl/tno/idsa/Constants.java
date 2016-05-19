@@ -6,11 +6,6 @@ package nl.tno.idsa;
 public class Constants {
 
     /**
-     * Names from which language are used?
-     */
-    public static final String NAMES_LANGUAGE_ID = "nl";
-
-    /**
      * The maximum number of agents sampled taken by the agent and location sampler to find suitable agents
      * for participating in a certain incident.
      */
@@ -35,6 +30,11 @@ public class Constants {
      * When sampling, how much closer to we want agents to be in order to be an improvement (e.g. at 80%).
      */
     public static final double INCIDENT_CLOSER_SAMPLING_FACTOR_GROUPS = 0.8;
+
+    /**
+     * Names from which language are used?
+     */
+    public static final String POPULATION_NAMES_LANGUAGE_ID = "nl";
 
     /**
      * How many iterations does the optimization algorithm for neighborhood population take?
