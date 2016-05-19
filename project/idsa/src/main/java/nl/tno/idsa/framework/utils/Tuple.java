@@ -1,10 +1,13 @@
 package nl.tno.idsa.framework.utils;
 
-// TODO Document class.
-
+/**
+ * Basic tuple.
+ * @param <I> First element.
+ * @param <J> Second element.
+ */
 public class Tuple<I, J> {
-    I first;
-    J second;
+    private I first;
+    private J second;
 
     public Tuple(I i, J j) {
         this.first = i;
