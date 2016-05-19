@@ -19,7 +19,7 @@ public class Sim {
     private Environment env;
 
     private double xRealTime = 10.0;
-    private double actualXRealtime;
+    private double actualXRealTime;
     private long simTime;
     private boolean done;
     private boolean requestPause;
@@ -76,7 +76,7 @@ public class Sim {
         // Last time update notification in real-time nano's
         long lastNotify = 0;
         long lastSimTime = 0;
-        this.actualXRealtime = xRealTime;
+        this.actualXRealTime = xRealTime;
         double frame = TIME_BETWEEN_UPDATES / this.xRealTime;
         while (!done) {
             isPaused = false;
@@ -90,7 +90,7 @@ public class Sim {
                 now = System.nanoTime();
                 // Check if we need to notify about the passed time
                 if ((now - lastNotify) > Time.NANO_SECOND) {
-                    this.actualXRealtime = (simTime - lastSimTime) / (double) (now - lastNotify);
+                    this.actualXRealTime = (simTime - lastSimTime) / (double) (now - lastNotify);
                     lastNotify = now;
                     lastSimTime = simTime;
                     env.notifyTimeUpdated();
@@ -177,6 +177,6 @@ public class Sim {
     }
 
     public double getActualXRealTime() {
-        return actualXRealtime;
+        return actualXRealTime;
     }
 }
