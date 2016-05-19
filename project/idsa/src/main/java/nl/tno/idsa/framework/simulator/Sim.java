@@ -11,7 +11,9 @@ import java.util.List;
  */
 public class Sim {
 
-    private static final double SIM_HERTZ = 5;  // TODO Somehow the sim clock rate needs to be adaptive so slower systems or bigger environments get run at the right real time factor and not slower.
+    // TODO Prefer if this is not a singleton. We could run multiple simulators, right?
+    // TODO Somehow the sim clock rate needs to be adaptive so slower systems or bigger environments get run at the right real time factor and not slower.
+    private static final double SIM_HERTZ = 5;
     private static final long TIME_BETWEEN_UPDATES = (long) (Time.NANO_SECOND / SIM_HERTZ);
 
     private Environment env;
