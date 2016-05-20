@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 public class TimeSettingDialog extends JDialog {
     public TimeSettingDialog(JFrame owner, final Environment environment) {
         super(owner, "Set new current time");
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // For consistency with other dialogs.
 
         JPanel contentPane = new JPanel(new BorderLayout(3, 3));
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));

@@ -22,6 +22,8 @@ import java.util.Vector;
 // TODO This dialog should ask for all the multipliers plus the day. Currently the multipliers are hardcoded.
 public class SeasonSettingDialog extends JDialog {
 
+    private static final String CAPTION = "Set multipliers";
+
     private ISeason selectedSeason;
     private ITimeOfYear selectedTimeOfYear;
     private DayOfWeek selectedDayOfWeek;
@@ -29,10 +31,25 @@ public class SeasonSettingDialog extends JDialog {
     private boolean cancelled;
 
     /**
-     * Environment may be null, in which case you need to call applySettingsTo(...) manually.
+     * Environment may be null, in which case you need to call applySettingsTo(...) manually or call
+     * createEnvironmentWithSettings to create an environment.
      */
     public SeasonSettingDialog(JFrame owner, final Environment environment) {
-        super(owner, "Set multipliers", ModalityType.APPLICATION_MODAL);
+        super(owner, CAPTION, ModalityType.APPLICATION_MODAL);
+        createDialog(environment);
+    }
+
+    /**
+     * Environment may be null, in which case you need to call applySettingsTo(...) manually or call
+     * createEnvironmentWithSettings to create an environment.
+     */
+    public SeasonSettingDialog(JDialog owner, final Environment environment) {
+        super(owner, CAPTION, ModalityType.APPLICATION_MODAL);
+        createDialog(environment);
+    }
+
+    private void createDialog(final Environment environment) {
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
         JPanel contentPane = new JPanel(new BorderLayout(3, 3));
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));

@@ -103,11 +103,7 @@ public class DataSourceFinder {
 
         @Override
         public String toString() {
-            return "DataSource{" +
-                    "path='" + path + '\'' +
-                    ", description='" + description + '\'' +
-                    ", model=" + model +
-                    '}';
+            return description != null ? description : path;
         }
     }
 }

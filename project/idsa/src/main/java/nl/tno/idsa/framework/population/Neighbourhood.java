@@ -38,6 +38,10 @@ public class Neighbourhood {
         this.areas = new HashMap<>();
     }
 
+    public String getNeighbourhoodName() {
+        return neighbourhoodName;
+    }
+
     //Hill climbing
     public void optimize(List<Group> householdPool) {
         Statistics current = Statistics.compute(houses);

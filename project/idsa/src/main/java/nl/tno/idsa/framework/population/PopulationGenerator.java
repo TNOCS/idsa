@@ -1,6 +1,7 @@
 package nl.tno.idsa.framework.population;
 
 import nl.tno.idsa.framework.agents.Agent;
+import nl.tno.idsa.framework.messaging.ProgressNotifier;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
 import nl.tno.idsa.framework.semantics_impl.groups.Group;
 import nl.tno.idsa.framework.semantics_impl.locations.LocationFunction;
@@ -13,6 +14,7 @@ import org.geotools.data.FileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.opengis.feature.Feature;
+import org.opengis.metadata.identification.Progress;
 
 import java.util.*;
 
@@ -41,29 +43,43 @@ public class PopulationGenerator {
     public List<Agent> generatePopulation(String neighbourhoodDataFilename) {
 
         //parse the neighbourhoods
+        ProgressNotifier.notifyProgressMessage("Parsing neighbourhoods...");
         int nrOfNecessaryAgents = parseNeighbourhoods(neighbourhoodDataFilename);
 
         // initialise population
+        ProgressNotifier.notifyProgressMessage("Creating households...");
         for (int i = 0; i < nrOfNecessaryAgents * populationSurplus; ) {
             Group household = createHousehold();
             i += household.size();
             families.add(household);
+            ProgressNotifier.notifyProgress(1.0 * i / (nrOfNecessaryAgents * populationSurplus));
         }
 
         // allocate families to houses
+        ProgressNotifier.notifyUnknownProgress();
+        ProgressNotifier.notifyProgressMessage("Allocating houses to households...");
         addHousesToNeighbourhoods();
         allocateHouseholdsToHouses();
 
         // hill climb on local data
-        for (Neighbourhood neighbourhood : neighbourhoods) {
+        ProgressNotifier.notifyProgress(0); // Reset to known progress.
+        for (int i = 0; i < neighbourhoods.size(); i++) {
+            Neighbourhood neighbourhood = neighbourhoods.get(i);
+            ProgressNotifier.notifyProgressMessage("Optimizing neighbourhood '" + neighbourhood.getNeighbourhoodName() + "'...");
             neighbourhood.optimize(families);
+            ProgressNotifier.notifyProgress(1.0 * (i+1) / neighbourhoods.size());
         }
-        // 
+
+        // last names
+        ProgressNotifier.notifyProgressMessage("Fixing last names for families...");
         List<Agent> result = getAgents();
         for (Agent a : result) {
             a.adaptLastNameToHousehold();
         }
+
         // Generate social network
+        ProgressNotifier.notifyUnknownProgress();
+        ProgressNotifier.notifyProgressMessage("Generating social network...");
         makeSocialNetwork(result);
 
         return result;
