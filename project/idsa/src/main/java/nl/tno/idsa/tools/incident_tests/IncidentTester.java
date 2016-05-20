@@ -8,7 +8,7 @@ import nl.tno.idsa.framework.population.PopulationGenerator;
 import nl.tno.idsa.framework.simulator.Sim;
 import nl.tno.idsa.framework.utils.Tuple;
 import nl.tno.idsa.framework.world.*;
-import nl.tno.idsa.library.population.PopulationDataNL;
+import nl.tno.idsa.library.population.PopulationDataProviderNL;
 import nl.tno.idsa.library.world.WorldModelNL;
 
 /**
@@ -25,7 +25,7 @@ public abstract class IncidentTester {
         // TODO A lot of hardcoded stuff here.
         World world = WorldGenerator.generateWorld(new WorldModelNL(), "../../data/idsa_nav_network.shp", "../../data/idsa_pand_osm_a_utm31n.shp", "../../data/idsa_public_areas_a_utm31n.shp", "../../data/idsa_vbo_utm31n.shp", "../../data/idsa_pand_p_utm31n.shp");
         Environment env = new Environment(world, new Day(21, 9, 2015), new Time(12, 0, 0));
-        env.setPopulation(new PopulationGenerator(env, new PopulationDataNL()).generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp"));
+        env.setPopulation(new PopulationGenerator(env, new PopulationDataProviderNL()).generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp"));
         env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), true);
 
         // STEP 1. CREATE INCIDENT.

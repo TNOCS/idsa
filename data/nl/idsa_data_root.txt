@@ -1,2 +1,3 @@
-model=WorldModelNL
-description=Rijswijk, Zuid-Holland, Nederland, 2016.
+worldModel=WorldModelNL
+populationDataProvider=PopulationDataProviderNL
+description=Rijswijk, Zuid-Holland, Nederland, 2016

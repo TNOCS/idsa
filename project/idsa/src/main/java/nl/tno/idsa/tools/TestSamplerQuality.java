@@ -21,7 +21,7 @@ import nl.tno.idsa.library.incidents.IncidentArrestAfterOffense;
 import nl.tno.idsa.library.incidents.IncidentComeToAid;
 import nl.tno.idsa.library.incidents.IncidentProcession;
 import nl.tno.idsa.library.locations.PoliceSpawnPoint;
-import nl.tno.idsa.library.population.PopulationDataNL;
+import nl.tno.idsa.library.population.PopulationDataProviderNL;
 import nl.tno.idsa.library.roles.Shoplifter;
 import nl.tno.idsa.library.roles.StreetThief;
 import nl.tno.idsa.viewer.MainFrame;
@@ -92,7 +92,7 @@ public class TestSamplerQuality {
                 path + "/idsa_pand_p_utm31n.shp");
 
         Environment env = new Environment(world, new Day(21, 9, 2015), new Time(10, 0, 0)); //there are people on the streets at this time.
-        env.setPopulation(new PopulationGenerator(env, new PopulationDataNL()).generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp"));
+        env.setPopulation(new PopulationGenerator(env, new PopulationDataProviderNL()).generatePopulation("../../data/nl/idsa_cbs_buurten_utm31n.shp"));
         env.initializePopulation(env.getSeason(), null, env.getDay(), env.getTime(), true);
         Sim sim = Sim.getInstance();
         sim.init(env);

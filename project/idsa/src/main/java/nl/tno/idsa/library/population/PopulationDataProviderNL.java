@@ -2,15 +2,15 @@ package nl.tno.idsa.library.population;
 
 import nl.tno.idsa.framework.population.Gender;
 import nl.tno.idsa.framework.population.HouseholdTypes;
-import nl.tno.idsa.framework.population.PopulationData;
+import nl.tno.idsa.framework.population.PopulationDataProvider;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-public class PopulationDataNL extends PopulationData {
-    public PopulationDataNL() {
+public class PopulationDataProviderNL extends PopulationDataProvider {
+    public PopulationDataProviderNL() {
         super(5, 100);
 
         householdTypes.put(HouseholdTypes.SINGLE, 2784943);//Single

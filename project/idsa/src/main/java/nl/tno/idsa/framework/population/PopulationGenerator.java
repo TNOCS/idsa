@@ -14,14 +14,13 @@ import org.geotools.data.FileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.opengis.feature.Feature;
-import org.opengis.metadata.identification.Progress;
 
 import java.util.*;
 
 public class PopulationGenerator {
 
     private final Environment environment;
-    private final PopulationData populationData;
+    private final PopulationDataProvider populationDataProvider;
 
     private final List<Neighbourhood> neighbourhoods;
     private final List<Group> families;
@@ -33,9 +32,9 @@ public class PopulationGenerator {
     private static final double Ms = 5;
     private static final int kmax = 100;
 
-    public PopulationGenerator(Environment environment, PopulationData populationData) {
+    public PopulationGenerator(Environment environment, PopulationDataProvider populationDataProvider) {
         this.environment = environment;
-        this.populationData = populationData;
+        this.populationDataProvider = populationDataProvider;
         this.neighbourhoods = new ArrayList<>(14);
         this.families = new ArrayList<>(10000);
     }
@@ -232,7 +231,7 @@ public class PopulationGenerator {
     }
 
     private Group createHousehold() {
-        HouseholdTypes householdType = populationData.getRandomHouseHoldType();
+        HouseholdTypes householdType = populationDataProvider.getRandomHouseHoldType();
         Group output;
         switch (householdType) {
             case SINGLE:
@@ -256,8 +255,8 @@ public class PopulationGenerator {
 
     private Group createSingleHousehold() {
         HouseholdTypes hhType = HouseholdTypes.SINGLE;
-        Gender gender = populationData.getRandomGender(hhType);
-        double age = populationData.getRandomAge(hhType, gender);
+        Gender gender = populationDataProvider.getRandomGender(hhType);
+        double age = populationDataProvider.getRandomAge(hhType, gender);
         Agent agent = new Agent(age, gender, hhType, HouseholdRoles.SINGLE, environment.getYear());
         Group household = new Group();
         household.add(agent);
@@ -266,9 +265,9 @@ public class PopulationGenerator {
 
     private Group createPairHousehold() {
         HouseholdTypes hhType = HouseholdTypes.PAIR;
-        Gender gender = populationData.getRandomGender(hhType);
-        double age = populationData.getRandomAge(hhType, gender);
-        Agent firstParent = new Agent(age, gender, hhType, populationData.getHouseholdRole(hhType, gender), environment.getYear());
+        Gender gender = populationDataProvider.getRandomGender(hhType);
+        double age = populationDataProvider.getRandomAge(hhType, gender);
+        Agent firstParent = new Agent(age, gender, hhType, populationDataProvider.getHouseholdRole(hhType, gender), environment.getYear());
         Group household = new Group();
         household.add(firstParent);
         double probHetero = 0.95; // TODO Hardcoded heterosexuality threshold.
@@ -281,18 +280,18 @@ public class PopulationGenerator {
         // TODO Introduce an age relation between parent1 and parent2; currently hard limit on 10 years difference. Via population data.
         double randomAge = Double.MAX_VALUE;
         while (Math.abs(age - randomAge) > 10) {
-            randomAge = populationData.getRandomAge(hhType, otherGender);
+            randomAge = populationDataProvider.getRandomAge(hhType, otherGender);
         }
-        Agent secondParent = new Agent(randomAge, otherGender, hhType, populationData.getHouseholdRole(hhType, otherGender), environment.getYear());
+        Agent secondParent = new Agent(randomAge, otherGender, hhType, populationDataProvider.getHouseholdRole(hhType, otherGender), environment.getYear());
         household.add(secondParent);
-        int numChildren = populationData.getRandomNumberOfChildren(hhType, age); // TODO Parents seem really old.
+        int numChildren = populationDataProvider.getRandomNumberOfChildren(hhType, age); // TODO Parents seem really old.
         if (numChildren == 0) {
             firstParent.setHouseholdRole(HouseholdRoles.IN_RELATIONSHIP);
             secondParent.setHouseholdRole(HouseholdRoles.IN_RELATIONSHIP);
         } else {
             for (int i = 0; i < numChildren; ++i) {
-                Gender genderOfChild = populationData.getRandomGenderOfChild();
-                double ageChild = populationData.getRandomAgeOfChild(household, gender);
+                Gender genderOfChild = populationDataProvider.getRandomGenderOfChild();
+                double ageChild = populationDataProvider.getRandomAgeOfChild(household, gender);
                 Agent child = new Agent(ageChild, genderOfChild, hhType, HouseholdRoles.CHILD, environment.getYear());
                 household.add(child);
             }
@@ -302,17 +301,17 @@ public class PopulationGenerator {
 
     private Group createSingleParentHousehold() {
         HouseholdTypes hhType = HouseholdTypes.SINGLE_PARENT;
-        Gender gender = populationData.getRandomGender(hhType);
-        double age = populationData.getRandomAge(hhType, gender);
-        Agent parent = new Agent(age, gender, hhType, populationData.getHouseholdRole(hhType, gender), environment.getYear());
+        Gender gender = populationDataProvider.getRandomGender(hhType);
+        double age = populationDataProvider.getRandomAge(hhType, gender);
+        Agent parent = new Agent(age, gender, hhType, populationDataProvider.getHouseholdRole(hhType, gender), environment.getYear());
         Group household = new Group();
         household.add(parent);
         //TODO: Perhaps: Add normal distribution to determination of ageChild.
         //TODO: Add more than 3 children to a family.
-        int numChildren = Math.max(1, populationData.getRandomNumberOfChildren(hhType, age));
+        int numChildren = Math.max(1, populationDataProvider.getRandomNumberOfChildren(hhType, age));
         for (int i = 0; i < numChildren; ++i) {
-            Gender genderOfChild = populationData.getRandomGenderOfChild();
-            double ageChild = populationData.getRandomAgeOfChild(household, gender);
+            Gender genderOfChild = populationDataProvider.getRandomGenderOfChild();
+            double ageChild = populationDataProvider.getRandomAgeOfChild(household, gender);
             Agent child = new Agent(ageChild, genderOfChild, hhType, HouseholdRoles.CHILD, environment.getYear());
             household.add(child);
         }

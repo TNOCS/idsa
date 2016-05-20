@@ -7,7 +7,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-public class PopulationData {
+public class PopulationDataProvider {
 
     protected final Map<HouseholdTypes, Integer> householdTypes;
 
@@ -35,7 +35,7 @@ public class PopulationData {
      * @param ageCategoryRange
      * @param maxAge
      */
-    public PopulationData(int ageCategoryRange, int maxAge) {
+    public PopulationDataProvider(int ageCategoryRange, int maxAge) {
         this.ageStepSize = ageCategoryRange;
         this.maxAge = maxAge;
         this.householdTypes = new EnumMap<>(HouseholdTypes.class);

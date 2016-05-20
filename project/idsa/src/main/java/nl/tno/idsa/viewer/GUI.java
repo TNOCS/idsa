@@ -13,7 +13,6 @@ import nl.tno.idsa.framework.world.Vertex;
 import nl.tno.idsa.framework.world.World;
 import nl.tno.idsa.framework.world.WorldGenerator;
 import nl.tno.idsa.library.locations.PoliceSpawnPoint;
-import nl.tno.idsa.library.population.PopulationDataNL;
 import nl.tno.idsa.viewer.components.ProgressDialog;
 import nl.tno.idsa.viewer.dialogs.DataSourceSelector;
 import nl.tno.idsa.viewer.dialogs.SeasonSettingDialog;
@@ -69,7 +68,7 @@ public class GUI {
         // Create a population.
         ProgressNotifier.notifyProgressMessage("Creating population...");
         ProgressNotifier.notifyUnknownProgress();
-        PopulationGenerator populationGenerator = new PopulationGenerator(env, dataSource.getPopulationData());
+        PopulationGenerator populationGenerator = new PopulationGenerator(env, dataSource.getPopulationDataProvider());
         List<Agent> population = populationGenerator.generatePopulation(path + "/idsa_cbs_buurten_utm31n.shp"); // TODO This also needs data-specific parsing. File name is partially Dutch.
         env.setPopulation(population);
 
