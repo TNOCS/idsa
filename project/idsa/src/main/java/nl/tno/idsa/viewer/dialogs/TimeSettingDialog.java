@@ -9,9 +9,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 /**
- * Created by jongsd on 29-10-15.
+ * Dialog to set a time value for a given environment.
  */
-// TODO Document class.
 public class TimeSettingDialog extends JDialog {
     public TimeSettingDialog(JFrame owner, final Environment environment) {
         super(owner, "Set new current time");

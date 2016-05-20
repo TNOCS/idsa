@@ -14,8 +14,8 @@ import nl.tno.idsa.framework.world.World;
 import nl.tno.idsa.framework.world.WorldGenerator;
 import nl.tno.idsa.library.locations.PoliceSpawnPoint;
 import nl.tno.idsa.viewer.components.ProgressDialog;
-import nl.tno.idsa.viewer.dialogs.DataSourceSelector;
-import nl.tno.idsa.viewer.dialogs.SeasonSettingDialog;
+import nl.tno.idsa.viewer.dialogs.DataSourceSelectionDialog;
+import nl.tno.idsa.viewer.dialogs.MultiplierSettingDialog;
 
 import javax.swing.*;
 import java.util.List;
@@ -36,15 +36,15 @@ public class GUI {
         // Ask the user which data must be loaded.
         ProgressNotifier.notifyProgressMessage("Loading world data...");
         ProgressNotifier.notifyUnknownProgress();
-        DataSourceSelector dataSourceSelector = new DataSourceSelector(progressDialog);
-        if (dataSourceSelector.isCancelled()) {
+        DataSourceSelectionDialog dataSourceSelectionDialog = new DataSourceSelectionDialog(progressDialog);
+        if (dataSourceSelectionDialog.isCancelled()) {
             System.exit(0);
         }
-        if (! dataSourceSelector.areDataSourcesPresent()) {
+        if (! dataSourceSelectionDialog.areDataSourcesPresent()) {
             JOptionPane.showMessageDialog(null, "No data sources found", "No data sources found", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }
-        DataSourceFinder.DataSource dataSource = dataSourceSelector.getSelectedDataSource();
+        DataSourceFinder.DataSource dataSource = dataSourceSelectionDialog.getSelectedDataSource();
 
         // Create the world object.
         String path = dataSource.getPath();
@@ -56,7 +56,7 @@ public class GUI {
                 path + "/idsa_pand_p_utm31n.shp");      // TODO File names are partially Dutch and not fully informative.
 
         // Ask the user for season, time, day, et cetera.
-        SeasonSettingDialog ssd = new SeasonSettingDialog(progressDialog, null);
+        MultiplierSettingDialog ssd = new MultiplierSettingDialog(progressDialog, null);
         if (ssd.isCancelled()) {
             System.exit(0);
         }

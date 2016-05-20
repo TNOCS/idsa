@@ -19,31 +19,34 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Vector;
 
+/**
+ * Dialog allowing to set multipliers for agendas.
+ */
 // TODO This dialog should ask for all the multipliers plus the day. Currently the multipliers are hardcoded.
-public class SeasonSettingDialog extends JDialog {
+public class MultiplierSettingDialog extends JDialog {
 
     private static final String CAPTION = "Set multipliers";
 
+    private DayOfWeek selectedDayOfWeek;
     private ISeason selectedSeason;
     private ITimeOfYear selectedTimeOfYear;
-    private DayOfWeek selectedDayOfWeek;
     private Time selectedTime;
     private boolean cancelled;
 
     /**
      * Environment may be null, in which case you need to call applySettingsTo(...) manually or call
-     * createEnvironmentWithSettings to create an environment.
+     * createEnvironmentWithSettings() to create an environment.
      */
-    public SeasonSettingDialog(JFrame owner, final Environment environment) {
+    public MultiplierSettingDialog(JFrame owner, final Environment environment) {
         super(owner, CAPTION, ModalityType.APPLICATION_MODAL);
         createDialog(environment);
     }
 
     /**
      * Environment may be null, in which case you need to call applySettingsTo(...) manually or call
-     * createEnvironmentWithSettings to create an environment.
+     * createEnvironmentWithSettings() to create an environment.
      */
-    public SeasonSettingDialog(JDialog owner, final Environment environment) {
+    public MultiplierSettingDialog(JDialog owner, final Environment environment) {
         super(owner, CAPTION, ModalityType.APPLICATION_MODAL);
         createDialog(environment);
     }

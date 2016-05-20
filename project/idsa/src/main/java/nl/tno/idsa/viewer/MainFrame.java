@@ -22,7 +22,7 @@ import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.framework.world.Point;
 import nl.tno.idsa.library.models.BasicMovementModel;
 import nl.tno.idsa.viewer.components.ProgressDialog;
-import nl.tno.idsa.viewer.dialogs.SeasonSettingDialog;
+import nl.tno.idsa.viewer.dialogs.MultiplierSettingDialog;
 import nl.tno.idsa.viewer.dialogs.TimeSettingDialog;
 import nl.tno.idsa.viewer.incidentsettings.IncidentParameterDialog;
 import nl.tno.idsa.viewer.incidentsettings.IncidentSelectorDialog;
@@ -160,8 +160,8 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         final JButton setSeasonButton = new JButton(new AbstractAction("Day/Season...") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SeasonSettingDialog seasonSettingDialog = new SeasonSettingDialog(mapFrame, sim.getEnvironment());  // The dialog decides whether it must be visible.
-                timeChanged(seasonSettingDialog.getSelectedTime());
+                MultiplierSettingDialog multiplierSettingDialog = new MultiplierSettingDialog(mapFrame, sim.getEnvironment());  // The dialog decides whether it must be visible.
+                timeChanged(multiplierSettingDialog.getSelectedTime());
             }
         });
         setSeasonButton.setFocusPainted(false);

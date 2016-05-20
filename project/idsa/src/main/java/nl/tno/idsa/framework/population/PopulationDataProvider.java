@@ -46,7 +46,7 @@ public class PopulationDataProvider {
         this.childrenAgeDistributions = new EnumMap<>(Gender.class);
     }
 
-    HouseholdTypes getRandomHouseHoldType() {
+    HouseholdTypes getRandomHouseholdType() {
         return RandomNumber.drawFromEnumeratedMap(HouseholdTypes.class, householdTypes);
     }
 

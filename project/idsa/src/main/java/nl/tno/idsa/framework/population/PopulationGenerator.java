@@ -231,7 +231,7 @@ public class PopulationGenerator {
     }
 
     private Group createHousehold() {
-        HouseholdTypes householdType = populationDataProvider.getRandomHouseHoldType();
+        HouseholdTypes householdType = populationDataProvider.getRandomHouseholdType();
         Group output;
         switch (householdType) {
             case SINGLE:

@@ -1,8 +1,5 @@
 package nl.tno.idsa.viewer.dialogs;
 
-import nl.tno.idsa.framework.behavior.likelihoods.DayOfWeek;
-import nl.tno.idsa.framework.behavior.multipliers.ISeason;
-import nl.tno.idsa.framework.behavior.multipliers.ITimeOfYear;
 import nl.tno.idsa.framework.utils.DataSourceFinder;
 
 import javax.swing.*;
@@ -15,7 +12,7 @@ import java.util.Vector;
 /**
  * Dialog allowing choice between the different data sources.
  */
-public class DataSourceSelector extends JDialog {
+public class DataSourceSelectionDialog extends JDialog {
 
     private static final String CAPTION = "Pick data source";
 
@@ -23,12 +20,12 @@ public class DataSourceSelector extends JDialog {
     private boolean cancelled;
     private DataSourceFinder.DataSource selectedDataSource;
 
-    public DataSourceSelector(JFrame owner) {
+    public DataSourceSelectionDialog(JFrame owner) {
         super(owner, CAPTION, ModalityType.APPLICATION_MODAL);
         createDialog();
     }
 
-    public DataSourceSelector(JDialog owner) {
+    public DataSourceSelectionDialog(JDialog owner) {
         super(owner, CAPTION, ModalityType.APPLICATION_MODAL);
         createDialog();
     }
@@ -55,7 +52,7 @@ public class DataSourceSelector extends JDialog {
         JPanel top = new JPanel(new BorderLayout(3, 3));
         final JList<DataSourceFinder.DataSource> jListDataSources = new JList<>();
         jListDataSources.setMinimumSize(new Dimension(300,150));
-        jListDataSources.setListData(new Vector<>(dataSources));
+        jListDataSources.setListData(new Vector<>(dataSources)); // Java legacy APIs...
         jListDataSources.setSelectedValue(defaultDataSource, true);
         top.add(new JScrollPane(jListDataSources));
         contentPane.add(top, BorderLayout.CENTER);
