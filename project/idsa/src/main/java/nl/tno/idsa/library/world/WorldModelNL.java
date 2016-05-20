@@ -6,7 +6,6 @@ import nl.tno.idsa.framework.world.WorldModel;
 import nl.tno.idsa.library.locations.*;
 import org.opengis.feature.Feature;
 
-// TODO Right now, we need to know which world model to use in order to read world data files.
 public class WorldModelNL extends WorldModel {
 
     // BAG building fields

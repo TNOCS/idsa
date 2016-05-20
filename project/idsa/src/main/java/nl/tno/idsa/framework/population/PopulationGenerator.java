@@ -85,7 +85,7 @@ public class PopulationGenerator {
         return result;
     }
 
-    public Map<Agent, List<Agent>> makeSocialNetwork(List<Agent> agents) {
+    private Map<Agent, List<Agent>> makeSocialNetwork(List<Agent> agents) {
 
         HashMap<Agent, List<Agent>> network = new HashMap<>();
 

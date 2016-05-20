@@ -24,7 +24,6 @@ import nl.tno.idsa.library.locations.PoliceSpawnPoint;
 import nl.tno.idsa.library.population.PopulationDataNL;
 import nl.tno.idsa.library.roles.Shoplifter;
 import nl.tno.idsa.library.roles.StreetThief;
-import nl.tno.idsa.library.world.WorldModelNL;
 import nl.tno.idsa.viewer.MainFrame;
 
 import java.util.ArrayList;
@@ -84,7 +83,7 @@ public class TestSamplerQuality {
         DataSourceFinder.DataSource dataSource = dataSources.get(0); // TODO We should let the user choose. Create a dialog box to show if there are multiple options.
         String path = dataSource.getPath();
 
-        World world = WorldGenerator.generateWorld(dataSource.getModel(),
+        World world = WorldGenerator.generateWorld(dataSource.getWorldModel(),
 
                 path + "/idsa_nav_network_pedestrian.shp",
                 path + "/idsa_pand_osm_a_utm31n.shp",

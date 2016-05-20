@@ -1,5 +1,6 @@
 package nl.tno.idsa.framework.utils;
 
+import nl.tno.idsa.framework.population.PopulationData;
 import nl.tno.idsa.framework.semantics_base.JavaSubclassFinder;
 import nl.tno.idsa.framework.world.WorldModel;
 
@@ -10,8 +11,10 @@ import java.util.*;
 
 /**
  * Find usable environment data in the project path. Folders are identified by the presence of a token file
- * entitled "idsa_data_root.txt". This should contain a property 'model' that tells us which WorldModel implementation
- * is needed to parse the data, and a property 'description' that should contain a concise description of the data.
+ * entitled "idsa_data_root.txt". This should contain a property 'worldModel' that tells us which WorldModel implementation
+ * is needed to parse the data, a property 'populationData' that tells us which PopulationData implementation is needed
+ * to construct the synthetic population, and finally a property 'description' that should contain a concise description
+ * of the data so that the user can decide which data to open.
  */
 // TODO For now, we traverse the directory tree upward, until we find a root from which data files are available. ...
 // We then immediately stop and return those data files. I.e. no further looking or scanning.
@@ -31,21 +34,20 @@ public class DataSourceFinder {
         List<DataSource> dataSources = new ArrayList<>(files.size());
         if (files.size() > 0)
         {
-            Set<Class<? extends WorldModel>> modelClasses = JavaSubclassFinder.listSubclasses(WorldModel.class);
-            HashMap<String, Class<? extends WorldModel>> modelClassesByName = new HashMap<>();
-            for (Class<? extends WorldModel> modelClass : modelClasses) {
-                modelClassesByName.put(modelClass.getSimpleName(), modelClass);
-            }
+            HashMap<String, Class<? extends WorldModel>> modelClassesByName = classesByName(WorldModel.class);
+            HashMap<String, Class<? extends PopulationData>> popClassesByName = classesByName(PopulationData.class);
             for (File dataDescriptor: files) {
                 Properties p = new Properties();
                 p.load(new FileInputStream(dataDescriptor));
                 String path = dataDescriptor.getCanonicalPath();
                 path = path.substring(0, path.lastIndexOf(File.separator));
-                String model = p.getProperty("model");
+                String model = p.getProperty("worldModel");
                 Class<? extends WorldModel> modelClass = modelClassesByName.get(model);
+                String pop = p.getProperty("populationData");
+                Class<? extends PopulationData> popClass = popClassesByName.get(pop);
                 String description = p.getProperty("description");
                 try {
-                    dataSources.add(new DataSource(path, description, modelClass.newInstance()));
+                    dataSources.add(new DataSource(path, description, modelClass.newInstance(), popClass.newInstance()));
                 }
                 catch (Exception e) {
                     // Ignore.
@@ -53,6 +55,17 @@ public class DataSourceFinder {
             }
         }
         return dataSources;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> HashMap<String, Class<? extends T>> classesByName(Class<? extends T> baseClass) {
+        Set modelClasses = JavaSubclassFinder.listSubclasses(baseClass); // Unchecked. Stupid Java.
+        HashMap<String, Class<? extends T>> classesByName = new HashMap<>();
+        for (Object classO : modelClasses) {
+            Class classC = (Class) classO;
+            classesByName.put(classC.getSimpleName(), classC);
+        }
+        return classesByName;
     }
 
     private static ArrayList<File> listDataSources(File root) {
@@ -81,12 +94,14 @@ public class DataSourceFinder {
     public static class DataSource {
         private String path;
         private String description;
-        private WorldModel model;
+        private WorldModel worldModel;
+        private PopulationData populationData;
 
-        private DataSource(String path, String description, WorldModel model) {
+        private DataSource(String path, String description, WorldModel worldModel, PopulationData populationData) {
             this.path = path;
             this.description = description;
-            this.model = model;
+            this.worldModel = worldModel;
+            this.populationData = populationData;
         }
 
         public String getPath() {
@@ -97,8 +112,12 @@ public class DataSourceFinder {
             return description;
         }
 
-        public WorldModel getModel() {
-            return model;
+        public WorldModel getWorldModel() {
+            return worldModel;
+        }
+
+        public PopulationData getPopulationData() {
+            return populationData;
         }
 
         @Override

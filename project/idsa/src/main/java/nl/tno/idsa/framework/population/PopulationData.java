@@ -7,7 +7,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO: Move away from "agent" package.
 public class PopulationData {
 
     protected final Map<HouseholdTypes, Integer> householdTypes;
@@ -31,6 +30,11 @@ public class PopulationData {
     // Hardcoded maximum age for a mother to get her last child
     protected static final double MAX_AGE_MOTHER = 48.0;
 
+    /**
+     * Subclasses must have a default constructor.
+     * @param ageCategoryRange
+     * @param maxAge
+     */
     public PopulationData(int ageCategoryRange, int maxAge) {
         this.ageStepSize = ageCategoryRange;
         this.maxAge = maxAge;
