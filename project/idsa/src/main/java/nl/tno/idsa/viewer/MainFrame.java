@@ -155,7 +155,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
             }
         });
         setTimeButton.setFocusPainted(false);
-        setTimeButton.setEnabled(false);
+        //setTimeButton.setEnabled(false);
 
         final JButton setSeasonButton = new JButton(new AbstractAction("Day/Season...") {
             @Override
@@ -165,14 +165,14 @@ public class MainFrame implements IEnvironmentObserver, Observer {
             }
         });
         setSeasonButton.setFocusPainted(false);
-        setSeasonButton.setEnabled(false);
+        //setSeasonButton.setEnabled(false);
 
-        javax.swing.JToggleButton playPauseButton = new javax.swing.JToggleButton(new AbstractAction("Pause") {    // TODO The sim starts running automatically. Once it doesn't, call this the play button and enable the time and season buttons.
+        javax.swing.JToggleButton playPauseButton = new javax.swing.JToggleButton(new AbstractAction("Play") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 sim.togglePause();
-                setTimeButton.setEnabled(!setTimeButton.isEnabled());
-                setSeasonButton.setEnabled(!setSeasonButton.isEnabled());
+                setTimeButton.setEnabled(setTimeButton.isEnabled());
+                setSeasonButton.setEnabled(setSeasonButton.isEnabled());
             }
         });
         playPauseButton.setFocusPainted(false);

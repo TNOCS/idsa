@@ -349,10 +349,12 @@ public class Agent implements ISimulatedObject {
     }
 
     public Model getCurrentModel() {
-        if (modelStack.size() > 0) {
-            return modelStack.peek();
-        } else {
-            return null;
+        synchronized (modelStack) {
+            if (modelStack.size() > 0) {
+                return modelStack.peek();
+            } else {
+                return null;
+            }
         }
     }
 
