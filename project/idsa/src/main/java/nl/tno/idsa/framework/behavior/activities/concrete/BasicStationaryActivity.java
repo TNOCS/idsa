@@ -17,23 +17,20 @@ public class BasicStationaryActivity extends Activity {
     /**
      * Whether the participants should use a model that makes them wander around.
      */
-    public static enum Wander {
+    public static enum WanderPolicy {
         OUTSIDE_ONLY, NEVER
     }
 
     private Model model;
 
-    public BasicStationaryActivity(PossibleActivity parent, Environment environment, Time start, Time end, Vertex location, Group group, Wander wander) {
+    public BasicStationaryActivity(PossibleActivity parent, Environment environment, Time start, Time end, Vertex location, Group group, WanderPolicy wanderPolicy) {
         super(parent, environment, location, start, location, end, group);
 
         // Create a model so the agent moves around the area, if desired.
-        if (wander == Wander.OUTSIDE_ONLY) {
+        if (wanderPolicy == WanderPolicy.OUTSIDE_ONLY) {
             model = new BasicAreaModel();
             model.setLocationAndEndTime(new LocationAndTime(location.getPoint(), end.getNanos()));
             model.setActors(group);
-            if (group == null) {
-                throw new Error("Erroneous activity made: " + this); // TODO More graceful error handling.
-            }
             model.setEnvironment(getEnvironment());
         }
     }

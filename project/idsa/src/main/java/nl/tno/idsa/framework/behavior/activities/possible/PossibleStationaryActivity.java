@@ -43,7 +43,7 @@ public abstract class PossibleStationaryActivity extends PossibleActivity {
      * stationary activity (which basically makes the agent wait and do nothing).
      */
     protected BasicStationaryActivity createStationaryActivity(Environment environment, Time start, Time end, Vertex location, Group group) {
-        return new BasicStationaryActivity(this, environment, start, end, location, group, BasicStationaryActivity.Wander.OUTSIDE_ONLY);
+        return new BasicStationaryActivity(this, environment, start, end, location, group, BasicStationaryActivity.WanderPolicy.OUTSIDE_ONLY);
     }
 
     @Override

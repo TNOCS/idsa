@@ -181,7 +181,7 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
      */
     public EnumMap<Index, Activity> createActivities(Agent agent, Environment environment) {
 
-        // TODO At the moment, we assume agents involved need to be there the whole time. ...
+        // TODO At the moment, we assume agents involved in bringing others need to stay the whole time. ...
         // In practice, they might only be involved in bringing or picking up others. This means we are too restrictive
         // in planning our activities with multiple agents.
         Group participants = getAgentsInvolved(agent);
@@ -236,7 +236,7 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
             Time earliestStart = possibleTimeSlot.getStartTime();
             Time latestEnd = possibleTimeSlot.getEndTime();
 
-            // TODO This does not take into account travel times for participants other than the agent itself.
+            // TODO We do not take into account travel times for participants other than the agent itself.
             suitableLocationData = getSuitableLocation(environment.getWorld(), agent, previousLocation, earliestStart, nextLocation, latestEnd);
 
             // Result?
@@ -480,7 +480,7 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
                                              Vertex locationPreviousActivity, Time endTimePreviousActivity,
                                              Vertex locationNextActivity, Time startTimeNextActivity,
                                              Vertex candidateLocation) {
-        // TODO Check candidate location for capacity?
+        // TODO Check explicitly provided candidate location for capacity?
         Path pathFromPrevious = world.getPath(locationPreviousActivity.getPoint(), candidateLocation.getPoint());
         double timeFromPreviousInS = pathFromPrevious.lengthInM() / agent.getNormalSpeedMs();
         Path pathToNext = world.getPath(candidateLocation.getPoint(), locationNextActivity.getPoint());
