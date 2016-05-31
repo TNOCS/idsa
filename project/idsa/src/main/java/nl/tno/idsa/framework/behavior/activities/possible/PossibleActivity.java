@@ -52,7 +52,7 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
      * the non-abstract createActivities method. This may return null if creating an activity is not possible, for
      * example if we try to plan a 2-hour activity an hour before the end of the day.
      */
-    protected abstract Activity createActivity(Time start, Time end, LocationData locationData, Group participants);
+    protected abstract Activity createActivity(Environment environment, Time start, Time end, LocationData locationData, Group participants);
 
     /**
      * Return the participants in this activity given the agent provided. This should include the agent itself, but not
@@ -179,7 +179,7 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
      * Create a concrete activity based on this possible activity, along with an activity to move towards and move away
      * from this concrete activity. This may return null if a concrete activity cannot be created.
      */
-    public EnumMap<Index, Activity> createActivities(Agent agent, World world) {
+    public EnumMap<Index, Activity> createActivities(Agent agent, Environment environment) {
 
         // TODO At the moment, we assume agents involved need to be there the whole time. ...
         // In practice, they might only be involved in bringing or picking up others. This means we are too restrictive
@@ -237,12 +237,12 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
             Time latestEnd = possibleTimeSlot.getEndTime();
 
             // TODO This does not take into account travel times for participants other than the agent itself.
-            suitableLocationData = getSuitableLocation(world, agent, previousLocation, earliestStart, nextLocation, latestEnd);
+            suitableLocationData = getSuitableLocation(environment.getWorld(), agent, previousLocation, earliestStart, nextLocation, latestEnd);
 
             // Result?
             if (suitableLocationData != null) {
                 DebugPrinter.println("                  Found suitable location: " + suitableLocationData.getLocation().getPoint());
-                suitableActivity = createActivity(earliestStart, latestEnd, suitableLocationData, getParticipants(agent));
+                suitableActivity = createActivity(environment, earliestStart, latestEnd, suitableLocationData, getParticipants(agent));
                 break;
             }
         }
@@ -277,7 +277,8 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
                 DebugPrinter.println("    Start of activity moved from " + suitableActivity.getStartTime() + " to " + laterStartTime);
                 DebugPrinter.println("    Plan move from " + suitableLocationData.getPreviousLocation().getPoint() + " to " + suitableLocationData.getLocation().getPoint());
 
-                BasicMovementActivity moveTowardsActivity = new BasicMovementActivity(this, // TODO Some activities might require different movement?
+                // TODO Some activities might require different movement?
+                BasicMovementActivity moveTowardsActivity = new BasicMovementActivity(this, environment,
                         suitableLocationData.getPreviousLocation(), suitableActivity.getStartTime().incrementByMinutes(0),
                         suitableLocationData.getLocation(), laterStartTime,
                         movementParticipants, true);
@@ -310,7 +311,8 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
                 DebugPrinter.println("    End of activity moved from " + suitableActivity.getEndTime() + " to " + earlierEndTime);
                 DebugPrinter.println("    Plan move from " + suitableLocationData.getLocation().getPoint() + " to " + suitableLocationData.getNextLocation().getPoint());
 
-                BasicMovementActivity moveFromActivity = new BasicMovementActivity(this, // TODO Some activities might require different movement?
+                // TODO Some activities might require different movement?
+                BasicMovementActivity moveFromActivity = new BasicMovementActivity(this, environment,
                         suitableLocationData.getLocation(), earlierEndTime,
                         suitableLocationData.getNextLocation(), suitableActivity.getEndTime().incrementByMinutes(0),
                         movementParticipants, false);

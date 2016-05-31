@@ -1,10 +1,10 @@
 package nl.tno.idsa.framework.behavior.activities.concrete;
 
-import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.behavior.activities.possible.PossibleActivity;
 import nl.tno.idsa.framework.behavior.models.Model;
 import nl.tno.idsa.framework.semantics_impl.groups.Group;
 import nl.tno.idsa.framework.semantics_impl.locations.LocationAndTime;
+import nl.tno.idsa.framework.world.Environment;
 import nl.tno.idsa.framework.world.Time;
 import nl.tno.idsa.framework.world.Vertex;
 import nl.tno.idsa.library.models.BasicAreaModel;
@@ -23,8 +23,8 @@ public class BasicStationaryActivity extends Activity {
 
     private Model model;
 
-    public BasicStationaryActivity(PossibleActivity parent, Time start, Time end, Vertex location, Group group, Wander wander) {
-        super(parent, location, start, location, end, group);
+    public BasicStationaryActivity(PossibleActivity parent, Environment environment, Time start, Time end, Vertex location, Group group, Wander wander) {
+        super(parent, environment, location, start, location, end, group);
 
         // Create a model so the agent moves around the area, if desired.
         if (wander == Wander.OUTSIDE_ONLY) {
@@ -34,9 +34,7 @@ public class BasicStationaryActivity extends Activity {
             if (group == null) {
                 throw new Error("Erroneous activity made: " + this); // TODO More graceful error handling.
             }
-            // TODO Obtain environment in a better way?
-            Agent a = (Agent) group.get(0);
-            model.setEnvironment(a.getEnvironment());
+            model.setEnvironment(getEnvironment());
         }
     }
 

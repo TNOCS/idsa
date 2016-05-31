@@ -6,6 +6,7 @@ import nl.tno.idsa.framework.behavior.activities.concrete.LocationData;
 import nl.tno.idsa.framework.semantics_impl.groups.Group;
 import nl.tno.idsa.framework.semantics_impl.locations.LocationFunction;
 import nl.tno.idsa.framework.utils.RandomNumber;
+import nl.tno.idsa.framework.world.Environment;
 import nl.tno.idsa.framework.world.Time;
 import nl.tno.idsa.framework.world.Vertex;
 
@@ -41,25 +42,25 @@ public abstract class PossibleStationaryActivity extends PossibleActivity {
      * Specialisations of this class may want to override this method to create another activity than a basic
      * stationary activity (which basically makes the agent wait and do nothing).
      */
-    protected BasicStationaryActivity createStationaryActivity(Time start, Time end, Vertex location, Group group) {
-        return new BasicStationaryActivity(this, start, end, location, group, BasicStationaryActivity.Wander.OUTSIDE_ONLY);
+    protected BasicStationaryActivity createStationaryActivity(Environment environment, Time start, Time end, Vertex location, Group group) {
+        return new BasicStationaryActivity(this, environment, start, end, location, group, BasicStationaryActivity.Wander.OUTSIDE_ONLY);
     }
 
     @Override
-    protected Activity createActivity(Time startOfFreeInterval, Time endOfFreeInterval, LocationData locationData, Group participants) {
+    protected Activity createActivity(Environment environment, Time startOfFreeInterval, Time endOfFreeInterval, LocationData locationData, Group participants) {
         if (participants == null || participants.size() == 0) {
             return null;
         }
         if (fillEntireTimeSlot == Fill.EntireTimeSlot) {
-            return createStationaryActivity(startOfFreeInterval, endOfFreeInterval, locationData.getLocation(), participants);
+            return createStationaryActivity(environment, startOfFreeInterval, endOfFreeInterval, locationData.getLocation(), participants);
         } else {
             double totalTravelTimeS = locationData.getTimeFromPreviousInS() + locationData.getTimeToNextInS();
             double minDurationInS = totalTravelTimeS + (getMinimalDurationInMinutes() * 60);
-            return createStationaryActivity(startOfFreeInterval, endOfFreeInterval, minDurationInS, locationData.getLocation(), participants);
+            return createStationaryActivity(environment, startOfFreeInterval, endOfFreeInterval, minDurationInS, locationData.getLocation(), participants);
         }
     }
 
-    private Activity createStationaryActivity(Time start, Time end, double minDurationIncludingTravelInS, Vertex location, Group group) {
+    private Activity createStationaryActivity(Environment environment, Time start, Time end, double minDurationIncludingTravelInS, Vertex location, Group group) {
 
         // No activity for no people.
         if (group == null || group.size() == 0) {
@@ -82,7 +83,7 @@ public abstract class PossibleStationaryActivity extends PossibleActivity {
         int startTimeInMinutes = RandomNumber.nextBoundedInt(0, slackMinutes);
         start = start.incrementByMinutes(startTimeInMinutes);
         end = start.incrementByMinutes(durationInMinutes);
-        BasicStationaryActivity basicStationaryActivity = createStationaryActivity(start, end, location, group);
+        BasicStationaryActivity basicStationaryActivity = createStationaryActivity(environment, start, end, location, group);
 
         if (start.howMuchLaterInMinutesIs(end) <= minDurationIncludingTravelInS / 60) {
             return null; // This is possible when an activity is planned close to the end of the day (5am).

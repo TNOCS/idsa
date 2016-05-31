@@ -5,6 +5,7 @@ import nl.tno.idsa.framework.behavior.activities.possible.PossibleActivity;
 import nl.tno.idsa.framework.behavior.models.Model;
 import nl.tno.idsa.framework.semantics_impl.groups.Group;
 import nl.tno.idsa.framework.semantics_impl.locations.LocationAndTime;
+import nl.tno.idsa.framework.world.Environment;
 import nl.tno.idsa.framework.world.Time;
 import nl.tno.idsa.framework.world.Vertex;
 import nl.tno.idsa.library.models.BasicMovementModel;
@@ -21,6 +22,7 @@ public class BasicMovementActivity extends Activity {
      * Create a basic movement activity.
      *
      * @param possibleActivity The possible activity that created this activity.
+     * @param environment      The environment the activity takes place in.
      * @param startLocation    Where to start.
      * @param startTime        When to start.
      * @param endLocation      Where to end up.
@@ -28,8 +30,8 @@ public class BasicMovementActivity extends Activity {
      * @param participants     Who is moving.
      * @param towards          Whether agents are moving towards, or from, an activity.
      */
-    public BasicMovementActivity(PossibleActivity possibleActivity, Vertex startLocation, Time startTime, Vertex endLocation, Time endTime, Group participants, boolean towards) {
-        super(possibleActivity, startLocation, startTime, endLocation, endTime, participants);
+    public BasicMovementActivity(PossibleActivity possibleActivity, Environment environment, Vertex startLocation, Time startTime, Vertex endLocation, Time endTime, Group participants, boolean towards) {
+        super(possibleActivity, environment, startLocation, startTime, endLocation, endTime, participants);
         this.towards = towards;
 
         // Make the movement model.
@@ -42,10 +44,7 @@ public class BasicMovementActivity extends Activity {
         BasicMovementModel model = new BasicMovementModel(slowest);
         model.setLocationAndEndTime(new LocationAndTime(endLocation.getPoint(), endTime.getNanos()));
         model.setActors(participants);
-
-        // TODO Pass environment instead of getting it from an agent?
-        Agent a = (Agent) participants.get(0);
-        model.setEnvironment(a.getEnvironment());
+        model.setEnvironment(getEnvironment());
         model.setForcedStartTime(startTime.getNanos());
 
         this.model = model;

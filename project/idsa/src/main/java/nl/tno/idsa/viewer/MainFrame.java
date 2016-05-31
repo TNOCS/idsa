@@ -184,7 +184,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
             @Override
             public void setSelected(ButtonModel model, boolean selected) {
                 if (selected) {
-                    super.setSelected(model, selected);
+                    super.setSelected(model, true);
                 } else {
                     clearSelection();
                 }

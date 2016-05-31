@@ -16,9 +16,9 @@ import nl.tno.idsa.framework.utils.RandomNumber;
 import nl.tno.idsa.framework.utils.TextUtils;
 import nl.tno.idsa.framework.utils.Tuple;
 import nl.tno.idsa.framework.world.Area;
+import nl.tno.idsa.framework.world.Environment;
 import nl.tno.idsa.framework.world.Time;
 import nl.tno.idsa.framework.world.Vertex;
-import nl.tno.idsa.framework.world.World;
 import nl.tno.idsa.tools.DebugPrinter;
 
 import java.util.*;
@@ -57,14 +57,14 @@ public class AgendaPlanner {
     // End settings and data structures for debugging. *****************************************************************
 
     private final DayOfWeek dayOfWeek;
-    private final World world;
+    private final Environment environment;
 
     private final IMultiplier[] multipliers;
 
     private final Map<Agent, ActivityLikelihoodMap> activityProbabilities;
 
-    public AgendaPlanner(World world, DayOfWeek dayOfWeek, IMultiplier... multipliers) {
-        this.world = world;
+    public AgendaPlanner(Environment environment, DayOfWeek dayOfWeek, IMultiplier... multipliers) {
+        this.environment = environment;
         this.dayOfWeek = dayOfWeek;
         this.multipliers = multipliers;
         this.activityProbabilities = new HashMap<>(30000);
@@ -248,7 +248,7 @@ public class AgendaPlanner {
     @SuppressWarnings("unchecked")
     private TreeMap<String, Integer> createOverviewCapacities() {
         HashMap<Class<? extends LocationFunction>, Integer> count = new HashMap<>();
-        for (Area a : world.getAreas()) {
+        for (Area a : environment.getWorld().getAreas()) {
             List<LocationFunction> functions = a.getFunctions();
             for (LocationFunction function : functions) {
                 int capacity = function.getCapacity();
@@ -381,7 +381,7 @@ public class AgendaPlanner {
                         DebugPrinter.println("  Threshold and likelihood: " + threshold + " < " + likelihoods.get(possibleActivity));
 
                         if (threshold < likelihoods.get(possibleActivity)) {
-                            EnumMap<PossibleActivity.Index, Activity> activities = possibleActivity.createActivities(agent, world);
+                            EnumMap<PossibleActivity.Index, Activity> activities = possibleActivity.createActivities(agent, environment);
                             if (activities != null && activities.get(PossibleActivity.Index.ACTIVITY) != null && activities.get(PossibleActivity.Index.ACTIVITY).getParticipants().size() != 0) {
 
                                 DebugPrinter.println("  Created activity: " + activities);
@@ -482,14 +482,14 @@ public class AgendaPlanner {
                 DebugPrinter.println("We can merge two moving activities");
 
                 // Rather cumbersome way of correctly estimating the new end time for the activity.
-                double a1pathLengthInM = world.getPathLengthInM(activity1.getStartLocation().getPoint(), activity1.getEndLocation().getPoint());
+                double a1pathLengthInM = environment.getWorld().getPathLengthInM(activity1.getStartLocation().getPoint(), activity1.getEndLocation().getPoint());
                 long a1durationInNs = activity1.getEndTime().getNanos() - activity1.getStartTime().getNanos();
-                double newPathLengthInM = world.getPathLengthInM(activity1.getStartLocation().getPoint(), activity2.getEndLocation().getPoint());
+                double newPathLengthInM = environment.getWorld().getPathLengthInM(activity1.getStartLocation().getPoint(), activity2.getEndLocation().getPoint());
                 long newDurationInNs = (long) ((newPathLengthInM / a1pathLengthInM) * a1durationInNs);
                 Time newEndTime = activity1.getStartTime().incrementByMinutes(0);
                 newEndTime.increment(newDurationInNs);
                 // Create a new movement activity, delete the two old ones.
-                agenda.set(firstIndex, new BasicMovementActivity(activity1.getPossibleActivity(), activity1.getStartLocation(), activity1.getStartTime(), activity2.getEndLocation(), newEndTime, activity1.getParticipants(), false));
+                agenda.set(firstIndex, new BasicMovementActivity(activity1.getPossibleActivity(), environment, activity1.getStartLocation(), activity1.getStartTime(), activity2.getEndLocation(), newEndTime, activity1.getParticipants(), false));
                 agenda.set(firstIndex + 1, null);
 
                 DebugPrinter.println("Activity   after  optimizing: - " + activity1);

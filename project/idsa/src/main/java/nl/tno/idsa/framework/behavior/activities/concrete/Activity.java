@@ -4,6 +4,7 @@ import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.behavior.activities.possible.PossibleActivity;
 import nl.tno.idsa.framework.behavior.models.Model;
 import nl.tno.idsa.framework.semantics_impl.groups.Group;
+import nl.tno.idsa.framework.world.Environment;
 import nl.tno.idsa.framework.world.Time;
 import nl.tno.idsa.framework.world.Vertex;
 
@@ -12,9 +13,9 @@ import nl.tno.idsa.framework.world.Vertex;
  */
 public abstract class Activity implements Comparable {
 
+    private final Environment environment;
     private Vertex startLocation;
     private Time startTime;
-
     private Vertex endLocation;
     private Time endTime;
 
@@ -22,8 +23,9 @@ public abstract class Activity implements Comparable {
 
     private final PossibleActivity possibleActivity;
 
-    public Activity(PossibleActivity possibleActivity, Vertex startLocation, Time startTime, Vertex endLocation, Time endTime, Group participants) {
+    public Activity(PossibleActivity possibleActivity, Environment environment, Vertex startLocation, Time startTime, Vertex endLocation, Time endTime, Group participants) {
         this.possibleActivity = possibleActivity;
+        this.environment = environment;
         this.startTime = startTime;
         this.endTime = endTime;
         this.startLocation = startLocation;
@@ -39,6 +41,10 @@ public abstract class Activity implements Comparable {
 
     public PossibleActivity getPossibleActivity() {
         return possibleActivity;
+    }
+
+    public Environment getEnvironment() {
+        return environment;
     }
 
     public Time getStartTime() {

@@ -55,7 +55,7 @@ public class Environment {
         if (makeAgendas) {
             DayOfWeek option = RuntimeEnum.getInstance(DayOfWeek.class).getOption(day.getDayOfWeek());
             if (option != null) {
-                AgendaPlanner ap = new AgendaPlanner(world, option, season, timeOfTheYear);
+                AgendaPlanner ap = new AgendaPlanner(this, option, season, timeOfTheYear);
                 ap.createAgendas(getHouseholds());
                 ProgressNotifier.notifyProgressMessage("Determining locations for population...");
                 for (Agent agent : getAgents()) {
