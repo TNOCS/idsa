@@ -212,6 +212,7 @@ public abstract class Incident extends ParametrizedObject implements Comparable<
 
     /**
      * For sorting incidents alphabetically.
+     * @return Standard comparator int.
      */
     @Override
     public int compareTo(Incident o) {

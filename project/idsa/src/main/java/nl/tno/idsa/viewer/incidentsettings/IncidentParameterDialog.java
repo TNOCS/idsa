@@ -4,6 +4,7 @@ import nl.tno.idsa.framework.behavior.incidents.Incident;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
 import nl.tno.idsa.framework.semantics_impl.variables.LocationVariable;
 import nl.tno.idsa.framework.semantics_impl.variables.Variable;
+import nl.tno.idsa.framework.utils.TextUtils;
 import nl.tno.idsa.framework.world.Environment;
 import nl.tno.idsa.viewer.components.PromptRenderer;
 import nl.tno.idsa.viewer.components.TimeSetterPanel;
@@ -62,14 +63,14 @@ public class IncidentParameterDialog extends JDialog {
                 continue;
             }
             Variable variable = parameters.get(parameterId);
-            PromptRenderer renderer = VariablePromptRendererFactory.getInstance().getRenderer(parameterId + "", variable); // TODO Improve. Show a nicer string representation of parameter.
+            PromptRenderer renderer = VariablePromptRendererFactory.getInstance().getRenderer(TextUtils.underscoredToText(parameterId + ""), variable);
             if (renderer != null) {
                 labelPanel.add(renderer.getLabelComponent());
                 promptPanel.add(renderer.getUserInputComponent());
                 componentMap.put(variable, renderer);
             } else {
-                labelPanel.add(new JLabel(parameterId + ""));
-                promptPanel.add(new JLabel("This parameter cannot be set"));
+                labelPanel.add(new JLabel(TextUtils.underscoredToText(parameterId + "")));
+                promptPanel.add(new JLabel("This parameter cannot be set."));
             }
         }
 

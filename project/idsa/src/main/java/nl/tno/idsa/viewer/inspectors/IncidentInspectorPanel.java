@@ -47,7 +47,7 @@ public class IncidentInspectorPanel extends InspectorPanel implements Observer {
     private void createSubComponents() {
         JPanel main = new SimpleGridBagPanel(SimpleGridBagPanel.GRID_ROWS);
         incidentList = createClickableIncidentList();
-        JComponent[] eventListRow = createRow("Active incidents", incidentList);
+        JComponent[] eventListRow = createRow("Current incidents", incidentList);
         main.add(createRow(eventListRow));
         agentList = createClickableAgentList(1);
         agentList.setListData(incidentAgents);

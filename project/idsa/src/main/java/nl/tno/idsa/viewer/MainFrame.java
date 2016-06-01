@@ -418,6 +418,9 @@ public class MainFrame implements IEnvironmentObserver, Observer {
                         break;
                     }
                 }
+                // TODO For now, we remove previous incidents from the running incidents observer ...
+                // It is very annoying that they suddenly disappear when finished. It would be nice if they
+                // would move from a "running incidents" to a "previous incidents" list.
                 runningIncidents.removeIncident(incident);
             }
         }.start();

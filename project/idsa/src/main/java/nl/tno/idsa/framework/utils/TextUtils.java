@@ -22,6 +22,16 @@ public class TextUtils {
         return builder.toString();
     }
 
+    public static String underscoredToText(String text) {
+        text = text.replaceAll("_", " ");
+        StringBuilder builder = new StringBuilder();
+        builder.append(text.charAt(0));
+        for (int i = 1; i < text.length(); i++) {
+            builder.append(Character.toLowerCase(text.charAt(i)));
+        }
+        return builder.toString();
+    }
+
     public static String classNamesToString(Collection collection) {
         return String.format("[%s]", classNamesToSimpleString(collection));
     }
