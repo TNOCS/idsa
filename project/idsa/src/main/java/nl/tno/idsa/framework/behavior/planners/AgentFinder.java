@@ -66,7 +66,6 @@ public class AgentFinder {
         return result;
     }
 
-    // TODO This method can move to a utility class.
     private static boolean containsIndex(int[] indices, int index) {
         boolean result = false;
         for (int i = 0; !result && i < indices.length; ++i) {

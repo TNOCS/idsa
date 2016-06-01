@@ -47,10 +47,13 @@ public class IncidentActionPlanner {
         DebugPrinter.println("Target action %s", incident.getEnablingAction());
 
         // First, create a plan that brings the groups involved in the right role or sequence of roles.
-        resolveRolePreconditions(actionPlan, incident.getEnablingAction(), incident.getBinder());
+        boolean success = resolveRolePreconditions(actionPlan, incident.getEnablingAction(), incident.getBinder());
+        if (!success) {
+            return null; // Plan failed.
+        }
 
         // Second, insert appropriate move actions between the various role actions.
-        boolean success = resolveMovesBetweenLocations(actionPlan, incident.getEnablingAction(), incident.getBinder());
+        success = resolveMovesBetweenLocations(actionPlan, incident.getEnablingAction(), incident.getBinder());
         if (!success) {
             return null; // Plan failed.
         }
@@ -63,15 +66,18 @@ public class IncidentActionPlanner {
     }
 
     // TODO For now, in case there are multiple options to realize a plan, we choose randomly. ...
-    // We do not remember what we tried before, nor look at suitability of the plan.
-    private void resolveRolePreconditions(ActionPlan actionPlan, Action action, VariableBinder binder) {
+    // We do not remember what we tried before, nor look at the suitability of the plan.
+    private boolean resolveRolePreconditions(ActionPlan actionPlan, Action action, VariableBinder binder) {
         DebugPrinter.println("Resolve actor role preconditions for action %s and role %s", action, action.getActorRequiredRole());
-        addActionSatisfyingRolePrecondition(action.getActorRequiredRole(), action.getActorVariable(), actionPlan, action, binder);
+        boolean success = addActionSatisfyingRolePrecondition(action.getActorRequiredRole(), action.getActorVariable(), actionPlan, action, binder);
+        if (!success) {
+            return false;
+        }
         DebugPrinter.println("Resolve target role preconditions for action %s and role %s", action, action.getTargetRequiredRole());
-        addActionSatisfyingRolePrecondition(action.getTargetRequiredRole(), action.getTargetVariable(), actionPlan, action, binder);
+        return addActionSatisfyingRolePrecondition(action.getTargetRequiredRole(), action.getTargetVariable(), actionPlan, action, binder);
     }
 
-    private void addActionSatisfyingRolePrecondition(Class<? extends Role> requiredRole, GroupVariable associatedGroupVariable, ActionPlan actionPlan, Action action, VariableBinder binder) {
+    private boolean addActionSatisfyingRolePrecondition(Class<? extends Role> requiredRole, GroupVariable associatedGroupVariable, ActionPlan actionPlan, Action action, VariableBinder binder) {
 
         // Do we need to satisfy a certain role?
         if (requiredRole != null) {
@@ -97,9 +103,10 @@ public class IncidentActionPlanner {
             Set<EnablingAction> enablingActions = getEnablingActions(requiredRole);
             DebugPrinter.println("Enabling actions for role: %s.", enablingActions);
 
-            // TODO Generate a more graceful error if we cannot find an enabling action.
+            // No enabling actions.
             if (enablingActions == null || enablingActions.size() == 0) {
-                throw new Error(requiredRole.getSimpleName() + " cannot be realized; no actions found that enable this role.");
+                System.err.println(requiredRole.getSimpleName() + " cannot be realized; no actions found that enable this role.");
+                return false;
             }
 
             // TODO Conversion Set->List is very inefficient.
@@ -115,7 +122,7 @@ public class IncidentActionPlanner {
                     actionToFulfillRolePrecondition = createNonAbstractInstance(enablingAction.getEnablingAction());
                     actionGivesActorThisRole = enablingAction.enablesActor();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    // e.printStackTrace();
                 }
             }
             DebugPrinter.println("Enabling action chosen for role: %s. This action enables it's actor: %s.", actionToFulfillRolePrecondition, actionGivesActorThisRole);
@@ -131,7 +138,8 @@ public class IncidentActionPlanner {
 
             // TODO Generate a more graceful error if we cannot plan for a precondition.
             else {
-                throw new Error("Cannot make plan. No action found to realize role " + requiredRole + ".");
+                System.err.println("Cannot make plan. No action found to realize role " + requiredRole + ".");
+                return false;
             }
 
             // Add the action to the plan.
@@ -156,13 +164,18 @@ public class IncidentActionPlanner {
             DebugPrinter.println("Removed role constraint %s for group %s.", requiredRole, associatedGroupVariable);
 
             // Recursion for the action to fulfill...
-            resolveRolePreconditions(actionPlan, actionToFulfillRolePrecondition, binder);
+            boolean success = resolveRolePreconditions(actionPlan, actionToFulfillRolePrecondition, binder);
+            if (!success) {
+                return false;
+            }
 
             // TODO Check whether the action happens to resolve any other preconditions. ...
             // If so, we should somehow remove them from the role/location preconditions to satisfy.
         } else {
             DebugPrinter.println("No role defined, so no actions needed.");
         }
+
+        return true;
     }
 
     private Action createNonAbstractInstance(Class<? extends Action> actionClass) {
@@ -240,8 +253,15 @@ public class IncidentActionPlanner {
             // This assumes no agents in the world have roles at the moment we start planning.
             // The planner cannot take this into account, so if we want to facilitate this, we need to think how.
             try {
-                addMoveBetween(actionPlan, action, true, null, binder, SemanticLibrary.getInstance().createSemanticInstance(MoveTo.class));  // Null: no action before the move.
-                addMoveBetween(actionPlan, action, false, null, binder, SemanticLibrary.getInstance().createSemanticInstance(MoveTo.class)); // Null: no action before the move.
+                boolean success;
+                success = addMoveBetween(actionPlan, action, true, null, binder, SemanticLibrary.getInstance().createSemanticInstance(MoveTo.class));  // Null: no action before the move.
+                if (!success) {
+                    return false;
+                }
+                success = addMoveBetween(actionPlan, action, false, null, binder, SemanticLibrary.getInstance().createSemanticInstance(MoveTo.class)); // Null: no action before the move.
+                if (!success) {
+                    return false;
+                }
             } catch (Exception e) {
                 // This should not happen, MoveTo must be instantiable.
                 System.err.println("Serious error: MoveTo not instantiable!");
@@ -387,8 +407,8 @@ public class IncidentActionPlanner {
         return true;
     }
 
-    private void addMoveBetween(ActionPlan actionPlan, Action actionTo, boolean forActorOfActionTo,
-                                Action actionFrom, VariableBinder binder, Action actionToMoveWith) {
+    private boolean addMoveBetween(ActionPlan actionPlan, Action actionTo, boolean forActorOfActionTo,
+                                   Action actionFrom, VariableBinder binder, Action actionToMoveWith) {
 
         GroupVariable variable = (forActorOfActionTo ? actionTo.getActorVariable() : actionTo.getTargetVariable());
 
@@ -404,8 +424,10 @@ public class IncidentActionPlanner {
                 boolean linkBeforeServesActor = true;
                 actionPlan.addActionBetween(actionToMoveWith, actionTo, actionFrom, linkAfterServesActor, linkBeforeServesActor);
             }
-            resolveRolePreconditionsForMove(actionPlan, actionTo, actionFrom, binder, actionToMoveWith);
+            return resolveRolePreconditionsForMove(actionPlan, actionTo, actionFrom, binder, actionToMoveWith);
         }
+
+        return true;
     }
 
     private ArrayList<Action> findMoveActionsForRole(Class<? extends Role> actorRoleWhileMoving) {
@@ -431,21 +453,29 @@ public class IncidentActionPlanner {
         return suitableActions;
     }
 
-    private void resolveRolePreconditionsForMove(ActionPlan actionPlan, Action actionTo, Action actionFrom, VariableBinder binder, Action actionToMoveWith) {
+    private boolean resolveRolePreconditionsForMove(ActionPlan actionPlan, Action actionTo, Action actionFrom, VariableBinder binder, Action actionToMoveWith) {
 
         Class<? extends Role> actorRequiredRole = actionToMoveWith.getActorRequiredRole();
         if (actorRequiredRole != null && !actorRequiredRole.equals(Civilian.class)) {
-            resolveRolePreconditionForMove(actionPlan, actionTo, actionFrom, binder, actionToMoveWith, actorRequiredRole);
+            boolean success = resolveRolePreconditionForMove(actionPlan, actionTo, actionFrom, binder, actionToMoveWith, actorRequiredRole);
+            if (!success) {
+                return false;
+            }
         }
 
         Class<? extends Role> targetRequiredRole = actionToMoveWith.getTargetRequiredRole();
         if (targetRequiredRole != null && !targetRequiredRole.equals(Civilian.class)) {
-            resolveRolePreconditionForMove(actionPlan, actionTo, actionFrom, binder, actionToMoveWith, targetRequiredRole);
+            boolean success = resolveRolePreconditionForMove(actionPlan, actionTo, actionFrom, binder, actionToMoveWith, targetRequiredRole);
+            if (!success) {
+                return false;
+            }
         }
+
+        return true;
     }
 
-    private void resolveRolePreconditionForMove(ActionPlan actionPlan, Action actionTo, Action actionFrom,
-                                                VariableBinder binder, Action actionToMoveWith, Class<? extends Role> requiredRole) {
+    private boolean resolveRolePreconditionForMove(ActionPlan actionPlan, Action actionTo, Action actionFrom,
+                                                   VariableBinder binder, Action actionToMoveWith, Class<? extends Role> requiredRole) {
         if (SemanticLibrary.getInstance().isSemanticSubclass(requiredRole, actionPlan.getActorRoleDirectlyAfter(actionFrom))) {
             DebugPrinter.println("Role %s is required and provided by %s.", requiredRole, actionFrom);
             actionPlan.copyTargetDependencies(actionFrom, actionToMoveWith);
@@ -459,15 +489,17 @@ public class IncidentActionPlanner {
             // TODO: We don't support the situation where a move action requires a more specific role than the action after it. ...
             // We need to 1) remove the part of the plan addressed to realizing the less specific role for the
             // action after, and 2) plan for realizing the role for the move action.
-            throw new Error(String.format("Role %s is required and action %s requires a superclass for actor, which is a problem: %s.", requiredRole, actionTo, actionTo.getActorRequiredRole()));
+            System.err.println(String.format("Role %s is required and action %s requires a superclass for actor, which is a problem: %s.", requiredRole, actionTo, actionTo.getActorRequiredRole()));
+            return false;
         } else if (SemanticLibrary.getInstance().isSemanticSuperclass(requiredRole, actionTo.getTargetRequiredRole())) {
-            throw new Error(String.format("Role %s is required and action %s requires a superclass for target, which is a problem: %s.", requiredRole, actionTo, actionTo.getActorRequiredRole()));
-            // TODO: See above.
+            System.err.println(String.format("Role %s is required and action %s requires a superclass for target, which is a problem: %s.", requiredRole, actionTo, actionTo.getActorRequiredRole()));
+            return false;
         } else {
             // The role needs separate realization.
             DebugPrinter.println("Role %s is required and no other action in the plan realizes it, so recursion is needed.", requiredRole);
-            resolveRolePreconditions(actionPlan, actionToMoveWith, binder);
+            return resolveRolePreconditions(actionPlan, actionToMoveWith, binder);
         }
+        return true;
     }
 
     public static Set<EnablingAction> getEnablingActions(Class<? extends Role> roleClass) {

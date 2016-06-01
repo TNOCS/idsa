@@ -596,7 +596,9 @@ public class AgendaPlanner {
 
             // Both activities can be modified.
             if (firstActivityCanBeModified && secondActivityCanBeModified) {
-                gapSizeToAddToFirstActivityNs = (long) (RandomNumber.nextDouble() * addToGapNs); // TODO At the moment the gap is filled randomly. This may be suboptimal given maximum durations.
+                // TODO At the moment a gap between activities is filled by randomly extending the activities on both sides. ...
+                // This may be suboptimal given maximum durations.
+                gapSizeToAddToFirstActivityNs = (long) (RandomNumber.nextDouble() * addToGapNs);
                 gapSizeToAddToSecondActivityNs = addToGapNs - gapSizeToAddToFirstActivityNs;
             }
 
