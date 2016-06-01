@@ -1,6 +1,6 @@
 package nl.tno.idsa.viewer.observers;
 
-import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,19 +11,19 @@ import java.util.Observable;
  */
 // TODO Document class.
 public class RunningIncidentsObserver extends Observable {
-    private final List<Incident> incidents;
+    private final List<PlannedIncident> incidents;
 
     public RunningIncidentsObserver() {
-        this.incidents = new ArrayList<Incident>();
+        this.incidents = new ArrayList<PlannedIncident>();
     }
 
-    public void addIncident(Incident e) {
+    public void addIncident(PlannedIncident e) {
         this.incidents.add(e);
         setChanged();
         notifyObservers(this.incidents);
     }
 
-    public void removeIncident(Incident e) {
+    public void removeIncident(PlannedIncident e) {
         this.incidents.remove(e);
         setChanged();
         notifyObservers(this.incidents);

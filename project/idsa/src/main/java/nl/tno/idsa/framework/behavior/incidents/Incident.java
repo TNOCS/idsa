@@ -31,11 +31,23 @@ public abstract class Incident extends ParametrizedObject implements Comparable<
     private VariableBinder binder = new VariableBinder();
     private ActionPlan actionPlan;
 
-    public static enum Parameters implements ParameterId {LOCATION_VARIABLE, ENABLING_ACTION_OPTIONS}
+    /**
+     * Incident parameters. Individual incidents can include their own parameters as well.
+     */
+    public static enum Parameters implements ParameterId {
+        /**
+         * The desired location.
+         */
+        LOCATION_VARIABLE,
+        /**
+         * The variable will contain a domain of concrete actions that can be chosen, if the enabling action is abstract.
+         */
+        ENABLING_ACTION_OPTIONS
+    }
 
     /**
-     * Note: to be found by the semantic library,
-     * implementations must provide a constructor that has the world as only parameter.
+     * Note: to be found by the semantic library, incident implementations must provide a constructor that has the world
+     * object as the only parameter. The other parameters must be set in
      */
     @SuppressWarnings("unchecked")
     protected Incident(World world, Class<? extends Action> enablingActionClass, GeometryType... allowedGeometryTypes)
@@ -45,14 +57,15 @@ public abstract class Incident extends ParametrizedObject implements Comparable<
         // Handle enabling action class.
         this.enablingActionClass = enablingActionClass;
         if (enablingActionClass == null) {
-            throw new IllegalArgumentException("Cannot create an incident based on no action.");
+            throw new IllegalArgumentException("Cannot create an incident if there is no enabling action.");
         }
 
         // Try to find a concrete implementation of the enabling action class.
         try {
             enablingAction = SemanticLibrary.getInstance().createSemanticInstance(enablingActionClass);
         } catch (InstantiationException e) {
-            // Someone probably make a semantically abstract action abstract in Java, too.
+            // Someone probably made a semantically abstract action abstract in Java, too. This is allowed, but
+            // gives an instantiation exception here.
         }
 
         // If we found no implementation, or only an abstract one, we need to find all subclasses that are okay.
@@ -72,7 +85,7 @@ public abstract class Incident extends ParametrizedObject implements Comparable<
                         viableSubclasses.add(next);
                     }
                 } catch (InstantiationException e) {
-                    // Ok so this class is not valid :)
+                    // Ok... so this class is not valid :)
                 }
             }
             if (viableSubclasses.size() == 0) {
@@ -89,14 +102,14 @@ public abstract class Incident extends ParametrizedObject implements Comparable<
         getParameters().put(Parameters.LOCATION_VARIABLE, locationVariable);
     }
 
-    protected World getWorld() {
-        return world;
-    }
-
+    /**
+     * @return The action that enables the incident, e.g. Arrest enables an incident where someone is arrested.
+     */
     @SuppressWarnings("unchecked")
     public Action getEnablingAction() {
 
-        // Try to read the value the user wanted.
+        // If the enabling action is null, this means the incident has an abstract enabling action. We can now try to
+        // see whether the user indicated which concrete action is desired.
         if (enablingAction == null) {
             try {
                 Class actionClass = (Class) getParameters().get(Parameters.ENABLING_ACTION_OPTIONS).getValue();
@@ -104,95 +117,98 @@ public abstract class Incident extends ParametrizedObject implements Comparable<
                     enablingAction = (Action) SemanticLibrary.getInstance().createSemanticInstance(actionClass);
                 }
             } catch (Exception e) {
-                // This is impossible, all options have been tested.
+                // The user did not specify a valid concrete action.
             }
         }
 
-        // Choose a random one.
+        // If the user did not choose, we choose a random possibility (and fix it).
         if (enablingAction == null) {
             try {
                 Set possibilities = getParameters().get(Parameters.ENABLING_ACTION_OPTIONS).getDomain();
                 Class actionClass = (Class) RandomNumber.randomElement(possibilities);
                 enablingAction = (Action) SemanticLibrary.getInstance().createSemanticInstance(actionClass);
             } catch (Exception e) {
-                // This is impossible, all options have been tested.
+                // This is impossible, as all options have been tested for instantiation.
+                // We also know that the set is not empty, because otherwise the constructor would have failed.
             }
         }
 
-        // TODO Handle the problem that we may not have any options for an enabling action.
+        // This is certainly not null.
         return enablingAction;
     }
 
+    /**
+     * @return The variable binder for this incident.
+     */
     public VariableBinder getBinder() {
         return binder;
     }
 
-    public Set<GeometryType> getAllowedLocationTypes() {
-        return ((LocationVariable) getParameters().get(Parameters.LOCATION_VARIABLE)).getAllowedGeometryTypes();
-    }
-
+    /**
+     * @param desiredActor The actor variable to use.
+     *                     This is bound to the actor variable of the enabling action.
+     */
     protected void setDesiredActor(GroupVariable desiredActor) {
         if (getEnablingAction() == null || getEnablingAction().getActorVariable() == null) return;
         getBinder().bind(getEnablingAction().getActorVariable(), desiredActor);
     }
 
+    /**
+     * @param desiredTarget The target variable to use.
+     *                      This is bound to the target variable of the enabling action.
+     */
     protected void setDesiredTarget(GroupVariable desiredTarget) {
         if (getEnablingAction() == null || getEnablingAction().getTargetVariable() == null) return;
         getBinder().bind(getEnablingAction().getTargetVariable(), desiredTarget);
     }
 
+    /**
+     * @param desiredLocation The location variable to use.
+     *                        This is bound to the location variable of the enabling action.
+     */
     protected void setDesiredLocation(LocationVariable desiredLocation) {
         if (getEnablingAction() == null || getEnablingAction().getLocationVariable() == null) return;
         getBinder().bind(getEnablingAction().getLocationVariable(), desiredLocation);
     }
 
-    protected LocationVariable getDesiredLocation() {
-        if (getEnablingAction() == null) return null;
-        return getEnablingAction().getLocationVariable();
-    }
-
+    /**
+     * After the incident's parameters have been set, this method must be called in order for the parameters to take
+     * effect. (For example, the location parameter is interpreted.)
+     *
+     * @return Whether the parameter values are valid and have indeed been bound.
+     */
     @SuppressWarnings("unchecked")
     public boolean bindParameters() {
 
         // Create the enabling action if needed.
-        if (enablingAction == null) {
-            try {
-                Class chosenActionClass = (Class) getParameters().get(Parameters.ENABLING_ACTION_OPTIONS).getValue();
-                enablingAction = (Action) SemanticLibrary.getInstance().createSemanticInstance(chosenActionClass); // Unchecked 2x.
-            } catch (Exception e) {
-                // This is impossible, all options have been tested.
-            }
-        }
+        getEnablingAction();
 
         // Handle the location.
-        setDesiredLocation((LocationVariable) getParameters().get(Incident.Parameters.LOCATION_VARIABLE));
+        setDesiredLocation((LocationVariable) getParameters().get(Parameters.LOCATION_VARIABLE));
 
         // TODO Check here whether the desired location is valid for the enabling action. ...
-        // If not, probably return false or throw an exception. Currently, we can e.g. shoplift on the street.
+        // If not, we probably should return false or throw an exception. Currently, we can e.g. shoplift on the street.
         return doBindParameters();
     }
 
     /**
-     * Returns false if the parameters are invalid.
+     * @return Whether the parameter values are valid and have indeed been bound.
      */
     protected abstract boolean doBindParameters();
 
     /**
+     * Return a string representation of the incident.
+     *
      * @return Default name, which is the name of the enabling action class.
      */
     public String getName() {
         return TextUtils.camelCaseToText(enablingActionClass.getSimpleName());
     }
 
+    /**
+     * @return A description of this incident in a more verbose form.
+     */
     public abstract String getDescription();
-
-    public ActionPlan getActionPlan() {
-        return actionPlan;
-    }
-
-    public void setActionPlan(ActionPlan actionPlan) {
-        this.actionPlan = actionPlan;
-    }
 
     /**
      * For sorting incidents alphabetically.

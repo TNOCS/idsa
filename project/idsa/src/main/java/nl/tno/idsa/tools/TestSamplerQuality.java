@@ -1,9 +1,9 @@
 package nl.tno.idsa.tools;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.behavior.planners.IncidentActionPlanner;
 import nl.tno.idsa.framework.behavior.planners.IncidentAgentAndLocationSampler;
-import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.messaging.Messenger;
 import nl.tno.idsa.framework.population.PopulationGenerator;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
@@ -177,11 +177,12 @@ public class TestSamplerQuality {
 
         for (Incident incident : incidents) {
             //Create a plan.
-            ActionPlan plan = IncidentActionPlanner.getInstance().createPlan(env, incident);
+            PlannedIncident plannedIncident = IncidentActionPlanner.getInstance().planIncidentActions(env, incident);
 
             //Find suitable values for variables in the world.
             time1 = System.nanoTime();
-            boolean planFound = IncidentAgentAndLocationSampler.instantiatePlan(env, plan);
+            IncidentAgentAndLocationSampler.instantiatePlan(env, plannedIncident);
+            boolean planFound = plannedIncident.getStatus() == PlannedIncident.Status.INSTANTIATED_WITHIN_TIME_CONSTRAINTS;
             time2 = System.nanoTime();
             eventToSamplingTime.put(incident, (((double) time2 - time1)) / ((double) Time.NANO_SECOND));
             if (planFound) {
@@ -193,22 +194,22 @@ public class TestSamplerQuality {
                 Fails++;
                 eventIsSolved.put(incident, false);
 
-                System.out.println("Current time to realize start of enabling action: " + Time.durationToString(plan.estimateDuration(env, false)));
-                System.out.println("Current time to realize end of enabling action: " + Time.durationToString(plan.estimateDuration(env, true)));
+                System.out.println("Current time to realize start of enabling action: " + Time.durationToString(plannedIncident.getActionPlan().estimateDuration(env, false)));
+                System.out.println("Current time to realize end of enabling action: " + Time.durationToString(plannedIncident.getActionPlan().estimateDuration(env, true)));
                 System.out.println("Allowed time to realize: " + Time.durationToString(eventToAllowedDuration.get(incident)));
 
                 if (incidentName.get(incident).equals("Procession")) {
-                    failTimeNeededProcession.put(incident, plan.estimateDuration(env, true));
+                    failTimeNeededProcession.put(incident, plannedIncident.getActionPlan().estimateDuration(env, true));
                 } else if (incidentName.get(incident).equals("Arrest")) {
-                    failTimeNeededArrest.put(incident, plan.estimateDuration(env, true));
+                    failTimeNeededArrest.put(incident, plannedIncident.getActionPlan().estimateDuration(env, true));
                 } else if (incidentName.get(incident).equals("Come to aid")) {
-                    failTimeNeededComeToAid.put(incident, plan.estimateDuration(env, true));
+                    failTimeNeededComeToAid.put(incident, plannedIncident.getActionPlan().estimateDuration(env, true));
                 }
 
                 if (showErrors && countFailwindows < 2) {
                     MainFrame mf = new MainFrame(sim);
                     mf.show();
-                    mf.visualizePlan(plan);
+                    mf.visualizePlan(plannedIncident.getActionPlan());
                     countFailwindows++;
                 }
 

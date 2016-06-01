@@ -1,7 +1,7 @@
 package nl.tno.idsa.viewer.inspectors;
 
 import nl.tno.idsa.framework.agents.Agent;
-import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.semantics_base.objects.ParameterId;
 import nl.tno.idsa.framework.semantics_impl.locations.LocationFunction;
 import nl.tno.idsa.framework.world.Environment;
@@ -68,7 +68,7 @@ public class AreaInspectorPanel extends InspectorPanel implements Observer {
     }
 
     @Override
-    protected void notifyEventSelected(Incident incident) {
+    protected void notifyIncidentSelected(PlannedIncident incident) {
         // Not happening.
     }
 

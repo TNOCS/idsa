@@ -1,12 +1,12 @@
 package nl.tno.idsa.tools.incident_tests;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.behavior.planners.IncidentPlanner;
 import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.messaging.Messenger;
 import nl.tno.idsa.framework.population.PopulationGenerator;
 import nl.tno.idsa.framework.simulator.Sim;
-import nl.tno.idsa.framework.utils.Tuple;
 import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.library.population.PopulationDataProviderNL;
 import nl.tno.idsa.library.world.WorldModelNL;
@@ -41,12 +41,12 @@ public abstract class IncidentTester {
 
         // STEP 3. CREATE A PLAN.
         System.out.println("\nCREATE INCIDENT PLAN");
-        Tuple<ActionPlan, Boolean> planTuple = IncidentPlanner.plan(env, incident);
-        if (!planTuple.getSecond()) {
+        PlannedIncident plannedIncident = IncidentPlanner.plan(env, incident);
+        ActionPlan plan = plannedIncident.getActionPlan();
+        if (plannedIncident.getStatus() == PlannedIncident.Status.INSTANTIATED_WITHOUT_TIME_CONSTRAINTS) {
             System.out.println("Plan will not take until " + new Time(desiredTime) +
-                    " but until " + new Time(planTuple.getFirst().getGoalAction().getLocationVariable().getValue().getTimeNanos())); // TODO The reported value is possibly wrong.
+                    " but until " + new Time(plan.getGoalAction().getLocationVariable().getValue().getTimeNanos())); // TODO The reported value is possibly wrong.
         }
-        ActionPlan plan = planTuple.getFirst();
         plan.startModels(env);      // Also spawns agents if needed.
         System.out.println("\n\nFINAL PLAN:\n" + plan.toString());
 

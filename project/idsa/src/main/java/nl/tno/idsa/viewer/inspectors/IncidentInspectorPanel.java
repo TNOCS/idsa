@@ -1,7 +1,7 @@
 package nl.tno.idsa.viewer.inspectors;
 
 import nl.tno.idsa.framework.agents.Agent;
-import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.semantics_impl.actions.Action;
 import nl.tno.idsa.framework.world.Time;
@@ -24,12 +24,12 @@ public class IncidentInspectorPanel extends InspectorPanel implements Observer {
     private final RunningIncidentsObserver runningIncidentsObserver;
     private final SelectionObserver selectionObserver;
 
-    private JList<Incident> incidentList;
+    private JList<PlannedIncident> incidentList;
     private JList<Agent> agentList;
     private JList<String> actionList;
 
-    private List<Incident> incidents;
-    private Vector<Agent> eventAgents = new Vector<>();
+    private List<PlannedIncident> incidents;
+    private Vector<Agent> incidentAgents = new Vector<>();
 
     public IncidentInspectorPanel(RunningIncidentsObserver runningIncidentsObserver, SelectionObserver selectionObserver) {
         super(Side.LEFT);
@@ -46,11 +46,11 @@ public class IncidentInspectorPanel extends InspectorPanel implements Observer {
 
     private void createSubComponents() {
         JPanel main = new SimpleGridBagPanel(SimpleGridBagPanel.GRID_ROWS);
-        incidentList = createClickableEventList();
+        incidentList = createClickableIncidentList();
         JComponent[] eventListRow = createRow("Active incidents", incidentList);
         main.add(createRow(eventListRow));
         agentList = createClickableAgentList(1);
-        agentList.setListData(eventAgents);
+        agentList.setListData(incidentAgents);
         JComponent[] agentListRow = createRow("Agents involved in selected incident", agentList);
         main.add(createRow(agentListRow));
         getMainPanel().add(main, BorderLayout.NORTH);
@@ -62,30 +62,30 @@ public class IncidentInspectorPanel extends InspectorPanel implements Observer {
 
     private void updateSubComponents() {
         if (incidents == null || incidents.size() == 0) {
-            incidentList.setListData(new Incident[]{});
-            notifyEventSelected(null);
+            incidentList.setListData(new PlannedIncident[]{});
+            notifyIncidentSelected(null);
             collapse();
         } else {
             incidentList.setListData(new Vector<>(incidents));
-            notifyEventSelected(incidents.get(0));
+            notifyIncidentSelected(incidents.get(0));
             expand();
         }
     }
 
     @Override
-    protected void notifyEventSelected(Incident incident) {
+    protected void notifyIncidentSelected(PlannedIncident incident) {
         incidentList.setSelectedValue(incident, true);
         selectionObserver.setIncident(incident);
         if (incident == null) {
-            eventAgents.clear();
+            incidentAgents.clear();
             agentList.clearSelection();
             notifyAgentSelected(null);
         } else {
             Set<Agent> agentsInvolved = incident.getActionPlan().getAgentsInvolved();
-            eventAgents.clear();
-            eventAgents.addAll(agentsInvolved);
-            agentList.setListData(eventAgents);
-            notifyAgentSelected(eventAgents.get(0));
+            incidentAgents.clear();
+            incidentAgents.addAll(agentsInvolved);
+            agentList.setListData(incidentAgents);
+            notifyAgentSelected(incidentAgents.get(0));
         }
     }
 
@@ -100,7 +100,7 @@ public class IncidentInspectorPanel extends InspectorPanel implements Observer {
         if (agent == null) {
             actionList.setListData(new String[]{});
         } else {
-            Incident selectedIncident = incidentList.getSelectedValue();
+            PlannedIncident selectedIncident = incidentList.getSelectedValue();
             if (selectedIncident != null) {
                 ActionPlan actionPlan = selectedIncident.getActionPlan();
                 List<Action> actionSequence = actionPlan.getActionSequence(agent);
@@ -125,7 +125,7 @@ public class IncidentInspectorPanel extends InspectorPanel implements Observer {
         // DO NOTHING
     }
 
-    private void setIncidents(List<Incident> incidents) {
+    private void setIncidents(List<PlannedIncident> incidents) {
         this.incidents = incidents;
         updateSubComponents();
     }
@@ -134,16 +134,16 @@ public class IncidentInspectorPanel extends InspectorPanel implements Observer {
     @SuppressWarnings("unchecked")
     public void update(Observable o, Object arg) {
         if (o instanceof SelectionObserver) {
-            if (arg instanceof Incident) {
-                List<Incident> incidents = new ArrayList<>(1);
-                incidents.add((Incident) arg);
+            if (arg instanceof PlannedIncident) {
+                List<PlannedIncident> incidents = new ArrayList<>(1);
+                incidents.add((PlannedIncident) arg);
                 setIncidents(incidents);
             }
         } else if (o instanceof RunningIncidentsObserver) {
             if (arg instanceof List) {
                 List list = (List) arg;
-                if ((list.size() > 0 && list.get(0) instanceof Incident)) {
-                    setIncidents((List<Incident>) list); // Unchecked cast due to the wonderful world of Java and generics.
+                if ((list.size() > 0 && list.get(0) instanceof PlannedIncident)) {
+                    setIncidents((List<PlannedIncident>) list); // Unchecked cast due to the wonderful world of Java and generics.
                 } else {
                     setIncidents(null);
                 }

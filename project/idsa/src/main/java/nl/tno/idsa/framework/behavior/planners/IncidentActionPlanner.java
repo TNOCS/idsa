@@ -1,6 +1,7 @@
 package nl.tno.idsa.framework.behavior.planners;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.messaging.Messenger;
 import nl.tno.idsa.framework.semantics_base.SemanticLibrary;
@@ -38,8 +39,7 @@ public class IncidentActionPlanner {
     private IncidentActionPlanner() {
     }
 
-    public ActionPlan createPlan(Environment environment, Incident incident)
-            throws Exception {
+    public PlannedIncident planIncidentActions(Environment environment, Incident incident) {
 
         // Start the plan.
         ActionPlan actionPlan = new ActionPlan(environment, incident.getBinder());
@@ -50,14 +50,16 @@ public class IncidentActionPlanner {
         resolveRolePreconditions(actionPlan, incident.getEnablingAction(), incident.getBinder());
 
         // Second, insert appropriate move actions between the various role actions.
-        resolveMovesBetweenLocations(actionPlan, incident.getEnablingAction(), incident.getBinder());
+        boolean success = resolveMovesBetweenLocations(actionPlan, incident.getEnablingAction(), incident.getBinder());
+        if (!success) {
+            return null; // Plan failed.
+        }
 
         DebugPrinter.println("%Incident plan%n----------%n%s", actionPlan);
         Messenger.broadcast(actionPlan.toString());
 
         // And return.
-        incident.setActionPlan(actionPlan);
-        return actionPlan;
+        return new PlannedIncident(incident, actionPlan);
     }
 
     // TODO For now, in case there are multiple options to realize a plan, we choose randomly. ...
@@ -189,8 +191,7 @@ public class IncidentActionPlanner {
         return null;
     }
 
-    private void resolveMovesBetweenLocations(ActionPlan actionPlan, Action action, VariableBinder binder)
-            throws Exception {
+    private boolean resolveMovesBetweenLocations(ActionPlan actionPlan, Action action, VariableBinder binder) {
 
         DebugPrinter.println("Resolve moves towards action %s.", action);
 
@@ -210,7 +211,7 @@ public class IncidentActionPlanner {
             }
         }
         if (spawning) {
-            return;
+            return true;
         }
 
         // Check whether the action allows moving towards it. If it does not AND does not spawn agents,
@@ -218,7 +219,7 @@ public class IncidentActionPlanner {
         if (action.allowsInsertMoveActionBefore() == Action.AllowsInsertMoveActionBefore.NO) {
             DebugPrinter.println("Action %s does not allow a move action before. It needs to happen at a place where an agent is.", action);
             action.getLocationVariable().restrictToAgentLocations(action.getActorVariable()); // TODO We skip the target here... This might create unexpected results.
-            return;
+            return true;
         }
 
         // Insert a suitable move.
@@ -232,24 +233,36 @@ public class IncidentActionPlanner {
             // If the action is a move action itself, it does not need moving towards it.
             if (action.movesActor()) {
                 DebugPrinter.println("Action %s will move the actor itself.", action);
-                return;
+                return true;
             }
 
             // TODO Think; we assume the first move in an incident plan can be an ordinary MoveTo. ...
             // This assumes no agents in the world have roles at the moment we start planning.
             // The planner cannot take this into account, so if we want to facilitate this, we need to think how.
-            addMoveBetween(actionPlan, action, true, null, binder, SemanticLibrary.getInstance().createSemanticInstance(MoveTo.class));  // Null: no action before the move.
-            addMoveBetween(actionPlan, action, false, null, binder, SemanticLibrary.getInstance().createSemanticInstance(MoveTo.class)); // Null: no action before the move.
+            try {
+                addMoveBetween(actionPlan, action, true, null, binder, SemanticLibrary.getInstance().createSemanticInstance(MoveTo.class));  // Null: no action before the move.
+                addMoveBetween(actionPlan, action, false, null, binder, SemanticLibrary.getInstance().createSemanticInstance(MoveTo.class)); // Null: no action before the move.
+            } catch (Exception e) {
+                // This should not happen, MoveTo must be instantiable.
+                System.err.println("Serious error: MoveTo not instantiable!");
+                return false;
+            }
 
-            return;
+            return true;
         }
 
         // Insert moves between this action and the action(s) directly before.
         boolean targetHandled = false;
         for (Action actionBefore : actionsDirectlyBefore) {
             DebugPrinter.println("Resolve moves between action %s and the action directly before, %s.", action, actionBefore);
-            resolveMoveBetween(actionPlan, action, actionBefore, binder);
-            resolveMovesBetweenLocations(actionPlan, actionBefore, binder);  // Recursive call.
+            boolean success = resolveMoveBetween(actionPlan, action, actionBefore, binder);
+            if (!success) {
+                return false; // Could not resolve a move.
+            }
+            success = resolveMovesBetweenLocations(actionPlan, actionBefore, binder);  // Recursive call.
+            if (!success) {
+                return false; // Could not resolve a move deeper in the plan tree.
+            }
             if (action.getTargetVariable() != null) {
                 targetHandled |=
                         binder.areVariablesBound(action.getTargetVariable(), actionBefore.getActorVariable()) ||
@@ -262,27 +275,28 @@ public class IncidentActionPlanner {
             DebugPrinter.println("Action %s is the first action in the plan for the target. Move towards it if needed.", action);
             addMoveBetween(actionPlan, action, false, null, binder, new MoveTo()); // Null: no action before the move.
         }
+
+        return true;
     }
 
-    private void resolveMoveBetween(ActionPlan actionPlan, Action actionTo, Action actionFrom, VariableBinder binder)
-            throws Exception {
+    private boolean resolveMoveBetween(ActionPlan actionPlan, Action actionTo, Action actionFrom, VariableBinder binder) {
         if (binder.areVariablesBound(actionTo.getActorVariable(), actionFrom.getActorVariable())) {
             DebugPrinter.println("Actor of %s is also actor of %s.", actionTo, actionFrom);
-            addActorMoveBetween(actionPlan, actionTo, actionFrom, true, binder);
+            return addActorMoveBetween(actionPlan, actionTo, actionFrom, true, binder);
         } else if (binder.areVariablesBound(actionTo.getTargetVariable(), actionFrom.getTargetVariable())) {
             DebugPrinter.println("Target of %s is also target of %s.", actionTo, actionFrom);
-            addTargetMoveBetween(actionPlan, actionTo, actionFrom, true, binder);
+            return addTargetMoveBetween(actionPlan, actionTo, actionFrom, true, binder);
         } else if (binder.areVariablesBound(actionTo.getActorVariable(), actionFrom.getTargetVariable())) {
             DebugPrinter.println("Actor of %s is target of %s.", actionTo, actionFrom);
-            addActorMoveBetween(actionPlan, actionTo, actionFrom, false, binder);
+            return addActorMoveBetween(actionPlan, actionTo, actionFrom, false, binder);
         } else if (binder.areVariablesBound(actionTo.getTargetVariable(), actionFrom.getActorVariable())) {
             DebugPrinter.println("Target of %s is actor of %s.", actionTo, actionFrom);
-            addTargetMoveBetween(actionPlan, actionTo, actionFrom, false, binder);
+            return addTargetMoveBetween(actionPlan, actionTo, actionFrom, false, binder);
         }
+        return false;
     }
 
-    private void addActorMoveBetween(ActionPlan actionPlan, Action actionTo, Action actionFrom, boolean moveActorIsAlsoActorInActionFrom, VariableBinder binder)
-    throws Exception {
+    private boolean addActorMoveBetween(ActionPlan actionPlan, Action actionTo, Action actionFrom, boolean moveActorIsAlsoActorInActionFrom, VariableBinder binder) {
 
         // Find move actions that are relevant for the role of the actor.
         Class<? extends Role> actorRoleWhileMoving = moveActorIsAlsoActorInActionFrom
@@ -317,7 +331,8 @@ public class IncidentActionPlanner {
                 }
             }
             if (chosenAction == null) {
-                throw new Exception("There is no move action with a target that can be inserted before " + actionTo.getClass() + ".");
+                System.err.println("There is no move action with a target that can be inserted before " + actionTo.getClass() + ".");
+                return false;
             }
             if (chosenAction.getTargetVariable() != null) {
                 binder.bind(actionTo.getTargetVariable(), chosenAction.getTargetVariable());  // Make sure we know we're talking about the same agents.
@@ -332,17 +347,18 @@ public class IncidentActionPlanner {
                 }
             }
             if (chosenAction == null) {
-                throw new Exception("There is no move action without a target that can be inserted before " + actionTo.getClass() + ".");
+                System.err.println("There is no move action without a target that can be inserted before " + actionTo.getClass() + ".");
+                return false;
             }
             DebugPrinter.println("Chose a random move action (with no target): %s.", chosenAction);
         }
 
         // Add the move.
         addMoveBetween(actionPlan, actionTo, true, actionFrom, binder, chosenAction);
+        return true;
     }
 
-    private void addTargetMoveBetween(ActionPlan actionPlan, Action actionTo, Action actionFrom, boolean isAlsoTargetInActionFrom, VariableBinder binder)
-            throws Exception {
+    private boolean addTargetMoveBetween(ActionPlan actionPlan, Action actionTo, Action actionFrom, boolean isAlsoTargetInActionFrom, VariableBinder binder) {
 
         // Find move actions that are relevant for the role of the target.
         Class<? extends Role> targetRoleWhileMoving = (isAlsoTargetInActionFrom
@@ -362,16 +378,17 @@ public class IncidentActionPlanner {
             }
         }
         if (chosenAction == null) {
-            throw new Error("There is no move action without a target that can be inserted before " + actionTo.getClass() + ".");
+            System.err.println("There is no move action without a target that can be inserted before " + actionTo.getClass() + ".");
+            return false;
         }
 
         DebugPrinter.println("Chose a random move action (with no target): %s.", chosenAction);
         addMoveBetween(actionPlan, actionTo, false, actionFrom, binder, chosenAction);
+        return true;
     }
 
     private void addMoveBetween(ActionPlan actionPlan, Action actionTo, boolean forActorOfActionTo,
-                                Action actionFrom, VariableBinder binder, Action actionToMoveWith)
-            throws Exception {
+                                Action actionFrom, VariableBinder binder, Action actionToMoveWith) {
 
         GroupVariable variable = (forActorOfActionTo ? actionTo.getActorVariable() : actionTo.getTargetVariable());
 
@@ -414,8 +431,7 @@ public class IncidentActionPlanner {
         return suitableActions;
     }
 
-    private void resolveRolePreconditionsForMove(ActionPlan actionPlan, Action actionTo, Action actionFrom, VariableBinder binder, Action actionToMoveWith)
-            throws Exception {
+    private void resolveRolePreconditionsForMove(ActionPlan actionPlan, Action actionTo, Action actionFrom, VariableBinder binder, Action actionToMoveWith) {
 
         Class<? extends Role> actorRequiredRole = actionToMoveWith.getActorRequiredRole();
         if (actorRequiredRole != null && !actorRequiredRole.equals(Civilian.class)) {
@@ -428,7 +444,8 @@ public class IncidentActionPlanner {
         }
     }
 
-    private void resolveRolePreconditionForMove(ActionPlan actionPlan, Action actionTo, Action actionFrom, VariableBinder binder, Action actionToMoveWith, Class<? extends Role> requiredRole) throws Exception {
+    private void resolveRolePreconditionForMove(ActionPlan actionPlan, Action actionTo, Action actionFrom,
+                                                VariableBinder binder, Action actionToMoveWith, Class<? extends Role> requiredRole) {
         if (SemanticLibrary.getInstance().isSemanticSubclass(requiredRole, actionPlan.getActorRoleDirectlyAfter(actionFrom))) {
             DebugPrinter.println("Role %s is required and provided by %s.", requiredRole, actionFrom);
             actionPlan.copyTargetDependencies(actionFrom, actionToMoveWith);

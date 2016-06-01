@@ -1,7 +1,7 @@
 package nl.tno.idsa.viewer.inspectors;
 
 import nl.tno.idsa.framework.agents.Agent;
-import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.world.Time;
 import nl.tno.idsa.viewer.components.CollapsePanel;
 
@@ -75,30 +75,30 @@ public abstract class InspectorPanel extends CollapsePanel {
 
     protected abstract void notifyAreaSelected(nl.tno.idsa.framework.world.Area area);
 
-    protected JList<Incident> createClickableEventList() {
-        final JList<Incident> eventList = new JList<Incident>();
-        eventList.setCellRenderer(new DefaultListCellRenderer() {
+    protected JList<PlannedIncident> createClickableIncidentList() {
+        final JList<PlannedIncident> incidentList = new JList<PlannedIncident>();
+        incidentList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                Incident incident = (Incident) value;
-                Time time = new Time(incident.getEnablingAction().getLocationVariable().getValue().getTimeNanos());
-                String descr = String.format("[%s] %s", time, incident.getName()); //, event.getDescription());
+                PlannedIncident plannedIncident = (PlannedIncident) value;
+                Time time = new Time(plannedIncident.getIncident().getEnablingAction().getLocationVariable().getValue().getTimeNanos());
+                String descr = String.format("[%s] %s", time, plannedIncident.getIncident().getName());
                 return super.getListCellRendererComponent(list, descr, index, isSelected, cellHasFocus);
             }
         });
-        eventList.addMouseListener(new MouseAdapter() {
+        incidentList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() != 1) {
                     return;
                 }
-                Incident incident = eventList.getSelectedValue();
-                notifyEventSelected(incident);
+                PlannedIncident incident = incidentList.getSelectedValue();
+                notifyIncidentSelected(incident);
             }
         });
-        eventList.setBorder(new LineBorder(SystemColor.controlDkShadow, 1));
-        return eventList;
+        incidentList.setBorder(new LineBorder(SystemColor.controlDkShadow, 1));
+        return incidentList;
     }
 
-    protected abstract void notifyEventSelected(Incident incident);
+    protected abstract void notifyIncidentSelected(PlannedIncident incident);
 }

@@ -2,6 +2,7 @@ package nl.tno.idsa.framework.behavior.planners;
 
 import nl.tno.idsa.Constants;
 import nl.tno.idsa.framework.agents.Agent;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.semantics_impl.groups.Group;
 import nl.tno.idsa.framework.semantics_impl.locations.LocationAndTime;
@@ -19,7 +20,9 @@ import java.util.List;
  */
 public class IncidentAgentAndLocationSampler {
 
-    public static boolean instantiatePlan(Environment environment, ActionPlan plan) {
+    public static void instantiatePlan(Environment environment, PlannedIncident plannedIncident) {
+
+        ActionPlan plan = plannedIncident.getActionPlan();
 
         long currentTime = environment.getTime().getNanos();
         long requiredEndTime = plan.getGoalAction().getLocationVariable().getValue().getTimeNanos();
@@ -34,8 +37,7 @@ public class IncidentAgentAndLocationSampler {
                 sampleValues(environment, plan);
                 DebugPrinter.println("%nSAMPLE %s%nINITIAL PLAN: %n%s%n.", samplingIteration, plan);
             } catch (Exception e) {
-                e.printStackTrace(); // TODO More graceful error handling.
-                return false;
+                plannedIncident.setStatus(PlannedIncident.Status.UNINSTANTIATED);
             }
 
             // Evaluate timing
@@ -134,7 +136,11 @@ public class IncidentAgentAndLocationSampler {
             plan.adjustPlanLength(currentTime);
         }
 
-        return planFound;
+        if (planFound) {
+            plannedIncident.setStatus(PlannedIncident.Status.INSTANTIATED_WITHIN_TIME_CONSTRAINTS);
+        } else {
+            plannedIncident.setStatus(PlannedIncident.Status.INSTANTIATED_WITHOUT_TIME_CONSTRAINTS);
+        }
     }
 
     public static List<Agent> sampleAgentsCloserTo(List<Agent> agents, GroupVariable gv, IGeometry tgt, double improvementBound) {

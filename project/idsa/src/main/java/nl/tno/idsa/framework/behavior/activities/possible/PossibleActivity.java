@@ -15,7 +15,8 @@ import nl.tno.idsa.tools.DebugPrinter;
 import java.util.*;
 
 /**
- * Base class for all possible activities. These describe the constraints for activities.
+ * Base class for possible activities. These describe the constraints for actual activities and can construct actual
+ * activities based on those constraints and a concrete environment/agent.
  */
 public abstract class PossibleActivity implements Comparable<PossibleActivity> {
 
@@ -28,7 +29,8 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
      * Create a possible activity.
      *
      * @param possibleTimeIntervals     Times the activity can take place in.
-     * @param possibleLocationFunctions Places the activity can take place at (interpreted as an 'or').
+     * @param possibleLocationFunctions Places the activity can take place at (interpreted as an 'or'). If this argument
+     *                                  is omitted, the activity is assumed to take place at the agent's house.
      */
     @SafeVarargs
     public PossibleActivity(PossibleTimeIntervals possibleTimeIntervals, Class<? extends LocationFunction>... possibleLocationFunctions) {
@@ -277,7 +279,7 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
                 DebugPrinter.println("    Start of activity moved from " + suitableActivity.getStartTime() + " to " + laterStartTime);
                 DebugPrinter.println("    Plan move from " + suitableLocationData.getPreviousLocation().getPoint() + " to " + suitableLocationData.getLocation().getPoint());
 
-                // TODO Some activities might require different movement?
+                // TODO Some activities might require a different movement activity than a basic movement activity.
                 BasicMovementActivity moveTowardsActivity = new BasicMovementActivity(this, environment,
                         suitableLocationData.getPreviousLocation(), suitableActivity.getStartTime().incrementByMinutes(0),
                         suitableLocationData.getLocation(), laterStartTime,
@@ -311,7 +313,7 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
                 DebugPrinter.println("    End of activity moved from " + suitableActivity.getEndTime() + " to " + earlierEndTime);
                 DebugPrinter.println("    Plan move from " + suitableLocationData.getLocation().getPoint() + " to " + suitableLocationData.getNextLocation().getPoint());
 
-                // TODO Some activities might require different movement?
+                // TODO Some activities might require a different movement activity than a basic movement activity.
                 BasicMovementActivity moveFromActivity = new BasicMovementActivity(this, environment,
                         suitableLocationData.getLocation(), earlierEndTime,
                         suitableLocationData.getNextLocation(), suitableActivity.getEndTime().incrementByMinutes(0),
@@ -384,7 +386,7 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
     }
 
     private Vertex getHouse(Agent agent) {
-        return (Vertex) agent.getHouse();
+        return agent.getHouse();
     }
 
     private LocationData getSuitableLocation(World world, Agent agent,
@@ -480,7 +482,7 @@ public abstract class PossibleActivity implements Comparable<PossibleActivity> {
                                              Vertex locationPreviousActivity, Time endTimePreviousActivity,
                                              Vertex locationNextActivity, Time startTimeNextActivity,
                                              Vertex candidateLocation) {
-        // TODO Check explicitly provided candidate location for capacity?
+        // Note: explicitly provided candidate locations are NOT checked for capacity.
         Path pathFromPrevious = world.getPath(locationPreviousActivity.getPoint(), candidateLocation.getPoint());
         double timeFromPreviousInS = pathFromPrevious.lengthInM() / agent.getNormalSpeedMs();
         Path pathToNext = world.getPath(candidateLocation.getPoint(), locationNextActivity.getPoint());

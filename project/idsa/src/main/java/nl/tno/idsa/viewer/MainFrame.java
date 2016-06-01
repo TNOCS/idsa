@@ -3,6 +3,7 @@ package nl.tno.idsa.viewer;
 import nl.tno.idsa.Constants;
 import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.behavior.planners.IncidentPlanner;
 import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.behavior.triggers.StaticAreaTrigger;
@@ -17,7 +18,6 @@ import nl.tno.idsa.framework.semantics_impl.variables.Variable;
 import nl.tno.idsa.framework.simulator.ISimulatedObject;
 import nl.tno.idsa.framework.simulator.Sim;
 import nl.tno.idsa.framework.utils.TextUtils;
-import nl.tno.idsa.framework.utils.Tuple;
 import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.framework.world.Point;
 import nl.tno.idsa.library.models.BasicMovementModel;
@@ -77,7 +77,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
     private final javax.swing.JPanel contentPane;
 
     private final SelectionObserver selectionObserver;
-    private final RunningIncidentsObserver incidents;
+    private final RunningIncidentsObserver runningIncidents;
 
     private final PCanvas canvas;
     private final PLayer uiLayer;
@@ -99,7 +99,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
 
         // Shared agent/incident selection
         this.selectionObserver = new SelectionObserver();
-        this.incidents = new RunningIncidentsObserver();
+        this.runningIncidents = new RunningIncidentsObserver();
 
         sim.setPause(true);
 
@@ -270,7 +270,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
         AreaInspectorPanel areaInspector = new AreaInspectorPanel(selectionObserver, sim.getEnvironment());
         inspectorPanel.add(areaInspector);
 
-        IncidentInspectorPanel eventInspector = new IncidentInspectorPanel(this.incidents, this.selectionObserver);
+        IncidentInspectorPanel eventInspector = new IncidentInspectorPanel(this.runningIncidents, this.selectionObserver);
         contentPane.add(eventInspector, BorderLayout.WEST);
     }
 
@@ -353,21 +353,26 @@ public class MainFrame implements IEnvironmentObserver, Observer {
 
         // Create a plan.
         ProgressNotifier.notifyShowProgress(true);
+        ProgressNotifier.notifyUnknownProgress();
         ProgressNotifier.notifyProgressMessage("Planning incident...");
 
         long desiredEndTime = incident.getEnablingAction().getLocationVariable().getValue().getTimeNanos();
-        Tuple<ActionPlan, Boolean> planTuple = IncidentPlanner.plan(sim.getEnvironment(), incident);
-        ActionPlan plan = planTuple.getFirst();
-        Boolean isValid = planTuple.getSecond();
+        PlannedIncident plannedIncident = IncidentPlanner.plan(sim.getEnvironment(), incident);
+        ActionPlan plan = plannedIncident.getActionPlan();
 
         ProgressNotifier.notifyShowProgress(false);
 
-        if (isValid) {
-            startIncident(incident, plan);
-        } else {
+        // Incident can happen precisely on time.
+        if (plannedIncident.getStatus() == PlannedIncident.Status.INSTANTIATED_WITHIN_TIME_CONSTRAINTS) {
+            plan.startModels(sim.getEnvironment());
+            notifyIncidentStarted(plannedIncident, plan);
+        }
+
+        // Incident can happen, but later than desired.
+        else if (plannedIncident.getStatus() == PlannedIncident.Status.INSTANTIATED_WITHOUT_TIME_CONSTRAINTS) {
             long achievedEndTime = plan.getGoalAction().getLocationVariable().getValue().getTimeNanos();
             int choice = javax.swing.JOptionPane.showConfirmDialog(
-                    null,
+                    mapFrame,
                     String.format("It seems %s is too soon to be able to realize this incident.\nCan it occur at %s instead?", new Time(desiredEndTime), new Time(achievedEndTime)),
                     "Incident happens too soon", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.QUESTION_MESSAGE);
 
@@ -380,17 +385,23 @@ public class MainFrame implements IEnvironmentObserver, Observer {
             else {
                 // TODO This sometimes seems to yield plans with a negative time for certain steps.
                 plan.startModels(environment);
-                startIncident(incident, plan);
+                notifyIncidentStarted(plannedIncident, plan);
             }
+        }
+
+        // Incident cannot happen at all, due to some error.
+        else {
+            // TODO Somehow trace why the incident cannot be planned and tell the user.
+            JOptionPane.showMessageDialog(mapFrame, "The incident could not be planned due to an unknown error.", "Error", JOptionPane.ERROR_MESSAGE);
         }
 
         // Resume simulation
         sim.setPause(false);
     }
 
-    private void startIncident(final Incident incident, final ActionPlan plan) {
+    private void notifyIncidentStarted(final PlannedIncident incident, final ActionPlan plan) {
 
-        incidents.addIncident(incident);
+        runningIncidents.addIncident(incident);
         visualizePlan(plan);
 
         // Make sure the incident becomes deactivated. TODO Note that this only works if incidents always finish exactly when they have to.
@@ -407,7 +418,7 @@ public class MainFrame implements IEnvironmentObserver, Observer {
                         break;
                     }
                 }
-                incidents.removeIncident(incident);
+                runningIncidents.removeIncident(incident);
             }
         }.start();
     }
@@ -836,10 +847,10 @@ public class MainFrame implements IEnvironmentObserver, Observer {
                         visualizePlan(selectionObserver.getIncident().getActionPlan());
                     }
                 }
-            } else if (arg instanceof Incident) {
-                Incident incident = (Incident) arg;
-                if (incident.getActionPlan() != null) {
-                    visualizePlan(incident.getActionPlan());
+            } else if (arg instanceof PlannedIncident) {
+                PlannedIncident plannedIncident = (PlannedIncident) arg;
+                if (plannedIncident.getActionPlan() != null) {
+                    visualizePlan(plannedIncident.getActionPlan());
                 }
             } else if (arg instanceof Area) {
                 PArea drawableFilledArea = getDrawableFilledArea((Area) arg);

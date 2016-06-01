@@ -6,8 +6,7 @@
 package nl.tno.idsa.framework.behavior.planners;
 
 import nl.tno.idsa.framework.behavior.incidents.Incident;
-import nl.tno.idsa.framework.behavior.plans.ActionPlan;
-import nl.tno.idsa.framework.utils.Tuple;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.world.Environment;
 
 /**
@@ -19,15 +18,11 @@ public class IncidentPlanner {
      *
      * @param env      The environment the plan takes place in.
      * @param incident The incident we want to plan.
-     * @return A tuple with an action plan, including agents and locations, plus a boolean indicating whether the plan realizes the incident within the time required.
-     * @throws Exception
+     * @return A planned incident.
      */
-    public static Tuple<ActionPlan, Boolean> plan(Environment env, Incident incident) throws Exception {
-        ActionPlan result = IncidentActionPlanner.getInstance().createPlan(env, incident);
-        boolean planFound = IncidentAgentAndLocationSampler.instantiatePlan(env, result);
-        if (planFound) {
-            result.startModels(env);
-        }
-        return new Tuple<>(result, planFound);
+    public static PlannedIncident plan(Environment env, Incident incident) {
+        PlannedIncident plannedIncident = IncidentActionPlanner.getInstance().planIncidentActions(env, incident);
+        IncidentAgentAndLocationSampler.instantiatePlan(env, plannedIncident);
+        return plannedIncident;
     }
 }

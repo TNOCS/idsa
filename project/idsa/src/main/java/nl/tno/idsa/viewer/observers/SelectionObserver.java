@@ -1,7 +1,7 @@
 package nl.tno.idsa.viewer.observers;
 
 import nl.tno.idsa.framework.agents.Agent;
-import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.world.Area;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import java.util.Observable;
 public class SelectionObserver extends Observable {
 
     private final List<Agent> agents;
-    private Incident incident;
+    private PlannedIncident incident;
     private Area area;
 
     public SelectionObserver() {
@@ -22,7 +22,7 @@ public class SelectionObserver extends Observable {
         this.incident = null;
     }
 
-    public void setIncident(Incident e) {
+    public void setIncident(PlannedIncident e) {
         boolean eventChanged = e == null ? this.incident != null : !e.equals(this.incident);
         if (eventChanged) {
             setChanged();
@@ -102,7 +102,7 @@ public class SelectionObserver extends Observable {
         return agents;
     }
 
-    public Incident getIncident() {
+    public PlannedIncident getIncident() {
         return incident;
     }
 

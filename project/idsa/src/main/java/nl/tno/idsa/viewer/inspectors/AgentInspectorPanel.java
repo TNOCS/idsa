@@ -2,7 +2,7 @@ package nl.tno.idsa.viewer.inspectors;
 
 import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.behavior.activities.concrete.Activity;
-import nl.tno.idsa.framework.behavior.incidents.Incident;
+import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.utils.TextUtils;
 import nl.tno.idsa.viewer.components.SimpleGridBagPanel;
 import nl.tno.idsa.viewer.observers.SelectionObserver;
@@ -74,7 +74,7 @@ public class AgentInspectorPanel extends InspectorPanel implements Observer {
     }
 
     @Override
-    protected void notifyEventSelected(Incident incident) {
+    protected void notifyIncidentSelected(PlannedIncident incident) {
         // Not happening.
     }
 
