@@ -136,7 +136,7 @@ public class IncidentActionPlanner {
                 }
             }
 
-            // TODO Generate a more graceful error if we cannot plan for a precondition.
+            // We cannot plan for a precondition.
             else {
                 System.err.println("Cannot make plan. No action found to realize role " + requiredRole + ".");
                 return false;
@@ -231,7 +231,7 @@ public class IncidentActionPlanner {
         // we need to locate this action at the same location as an agent.
         if (action.allowsInsertMoveActionBefore() == Action.AllowsInsertMoveActionBefore.NO) {
             DebugPrinter.println("Action %s does not allow a move action before. It needs to happen at a place where an agent is.", action);
-            action.getLocationVariable().restrictToAgentLocations(action.getActorVariable()); // TODO We skip the target here... This might create unexpected results.
+            action.getLocationVariable().restrictToAgentLocations(action.getActorVariable()); // TODO We skip the target here. This might create unexpected results.
             return true;
         }
 
@@ -249,9 +249,9 @@ public class IncidentActionPlanner {
                 return true;
             }
 
-            // TODO Think; we assume the first move in an incident plan can be an ordinary MoveTo. ...
+            // TODO We assume the first move in an incident plan can be an ordinary MoveTo. ...
             // This assumes no agents in the world have roles at the moment we start planning.
-            // The planner cannot take this into account, so if we want to facilitate this, we need to think how.
+            // The planner cannot take initial roles into account, so if we want to facilitate this, we need to think how.
             try {
                 boolean success;
                 success = addMoveBetween(actionPlan, action, true, null, binder, SemanticLibrary.getInstance().createSemanticInstance(MoveTo.class));  // Null: no action before the move.
@@ -444,7 +444,7 @@ public class IncidentActionPlanner {
                         suitableActions.add(actionInstance);
                     }
                 }
-                // TODO Think; perhaps we can think of situations where an action moves a target and not (only) an actor.
+                // TODO Perhaps we can think of situations where an action moves a target and not (only) an actor. ...
                 // If so, we need a target location after action in the Action class, and corresponding logic here.
             } catch (Exception e) {
                 e.printStackTrace();

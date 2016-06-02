@@ -181,7 +181,7 @@ public class TestSamplerQuality {
 
             //Find suitable values for variables in the world.
             time1 = System.nanoTime();
-            IncidentAgentAndLocationSampler.instantiatePlan(env, plannedIncident);
+            IncidentAgentAndLocationSampler.instantiateIncident(plannedIncident, env);
             boolean planFound = plannedIncident.getStatus() == PlannedIncident.Status.INSTANTIATED_WITHIN_TIME_CONSTRAINTS;
             time2 = System.nanoTime();
             eventToSamplingTime.put(incident, (((double) time2 - time1)) / ((double) Time.NANO_SECOND));

@@ -22,7 +22,7 @@ public class IncidentPlanner {
      */
     public static PlannedIncident plan(Environment env, Incident incident) {
         PlannedIncident plannedIncident = IncidentActionPlanner.getInstance().planIncidentActions(env, incident);
-        IncidentAgentAndLocationSampler.instantiatePlan(env, plannedIncident);
+        IncidentAgentAndLocationSampler.instantiateIncident(plannedIncident, env);
         return plannedIncident;
     }
 }

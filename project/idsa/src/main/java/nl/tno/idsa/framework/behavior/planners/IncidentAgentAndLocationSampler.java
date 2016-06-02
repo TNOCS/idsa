@@ -6,6 +6,7 @@ import nl.tno.idsa.framework.behavior.incidents.PlannedIncident;
 import nl.tno.idsa.framework.behavior.plans.ActionPlan;
 import nl.tno.idsa.framework.semantics_impl.groups.Group;
 import nl.tno.idsa.framework.semantics_impl.locations.LocationAndTime;
+import nl.tno.idsa.framework.semantics_impl.roles.Role;
 import nl.tno.idsa.framework.semantics_impl.variables.GroupVariable;
 import nl.tno.idsa.framework.semantics_impl.variables.LocationVariable;
 import nl.tno.idsa.framework.semantics_impl.variables.Variable;
@@ -13,6 +14,8 @@ import nl.tno.idsa.framework.utils.RandomNumber;
 import nl.tno.idsa.framework.world.*;
 import nl.tno.idsa.tools.DebugPrinter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -20,7 +23,13 @@ import java.util.List;
  */
 public class IncidentAgentAndLocationSampler {
 
-    public static void instantiatePlan(Environment environment, PlannedIncident plannedIncident) {
+    /**
+     * Instantiate the incident, which currently has a plan without concrete agents and locations.
+     *
+     * @param plannedIncident The incident.
+     * @param environment     In which environment.
+     */
+    public static void instantiateIncident(PlannedIncident plannedIncident, Environment environment) {
 
         ActionPlan plan = plannedIncident.getActionPlan();
 
@@ -30,23 +39,28 @@ public class IncidentAgentAndLocationSampler {
 
         boolean planFound = false;
         int samplingIteration = 0;
+
+        // Iterate through sampling attempts.
         while (samplingIteration < Constants.INCIDENT_MAX_SAMPLE_ATTEMPTS && !planFound) {
             samplingIteration++;
-            // Initial random values
+
+            // Initial random values.
             try {
-                sampleValues(environment, plan);
+                sampleValuesForVariables(plan, environment);
                 DebugPrinter.println("%nSAMPLE %s%nINITIAL PLAN: %n%s%n.", samplingIteration, plan);
             } catch (Exception e) {
                 plannedIncident.setStatus(PlannedIncident.Status.UNINSTANTIATED);
             }
 
-            // Evaluate timing
+            // Evaluate timing.
             long estimatedDuration = plan.estimateDuration(environment, false); // Do not include the duration of the goal action.
             DebugPrinter.println("Initial estimated duration is %s.", Time.durationToString(estimatedDuration));
 
             // Reselect one of the variables, shortening trip distances.
             int refiningIteration = 0;
             if (estimatedDuration > requiredDuration) {
+
+                // Iterate through shortening the plan duration.
                 while (estimatedDuration > requiredDuration && refiningIteration < Constants.INCIDENT_MAX_REFINING_ITERATIONS) {
 
                     // Determine a restricting variable.
@@ -100,17 +114,20 @@ public class IncidentAgentAndLocationSampler {
                                 LocationVariable firstLocation = plan.getFirstLocationInPlan(gv);
                                 if (firstLocation != null) {
                                     IGeometry tgt = firstLocation.getValue().getLocation();
-                                    List<Agent> newAgents = sampleAgentsCloserTo(environment.getAgents(), gv, tgt, Constants.INCIDENT_CLOSER_SAMPLING_FACTOR_GROUPS); //TODO: perhaps: we have information on the slowest agent in the group from getRestrictingVariables.
+                                    List<Agent> newAgents = sampleAgentsCloserTo(environment.getAgents(), gv, tgt, Constants.INCIDENT_CLOSER_SAMPLING_FACTOR_GROUPS); //TODO: We could use information on the slowest agent in the group (obtained from getRestrictingVariables).
 
                                     // If enough agents have been found closer to the target
                                     if (newAgents.size() >= gv.getValue().size()) {
                                         gv.setValue(new Group(newAgents));
                                     } else {
-                                        // TODO What do we do if we cannot find a sufficient number of agents?
+                                        System.err.println("Cannot find enough agents for an incident plan.");
+                                        plannedIncident.setStatus(PlannedIncident.Status.UNINSTANTIATED);
+                                        return;
                                     }
                                 }
                             }
                         }
+
                         // Re-evaluate plan timings
                         estimatedDuration = plan.estimateDuration(environment, false); // Without the goal action.
                         DebugPrinter.println("Current estimated duration is %s.", Time.durationToString(estimatedDuration));
@@ -121,21 +138,25 @@ public class IncidentAgentAndLocationSampler {
                         ++refiningIteration;
                     }
                 }
-            } else {
+            }
+
+            // Plan duration is already good.
+            else {
                 planFound = true;
             }
         }
 
-        // Make sure the plan starts and finishes exactly on time
+        // Make sure the plan starts and finishes exactly on time by delaying it a little if needed.
         if (planFound) {
             plan.adjustPlanLength(currentTime, requiredEndTime);
         }
 
-        // Otherwise just fix the starting time.
+        // Otherwise, just fix the starting time.
         else {
             plan.adjustPlanLength(currentTime);
         }
 
+        // Return.
         if (planFound) {
             plannedIncident.setStatus(PlannedIncident.Status.INSTANTIATED_WITHIN_TIME_CONSTRAINTS);
         } else {
@@ -143,8 +164,8 @@ public class IncidentAgentAndLocationSampler {
         }
     }
 
-    public static List<Agent> sampleAgentsCloserTo(List<Agent> agents, GroupVariable gv, IGeometry tgt, double improvementBound) {
-        return new AgentSampler(agents, gv.getNumMembers(), gv.getMemberRole(), maxDistanceTo(gv.getValue(), tgt), tgt.getFirstPoint(), improvementBound).sampleAgents();
+    private static List<Agent> sampleAgentsCloserTo(List<Agent> agents, GroupVariable gv, IGeometry tgt, double improvementBound) {
+        return sampleAgents(agents, gv.getNumMembers(), gv.getMemberRole(), maxDistanceTo(gv.getValue(), tgt), tgt.getFirstPoint(), improvementBound);
     }
 
     private static double maxDistanceTo(Group agents, IGeometry tgt) {
@@ -158,10 +179,10 @@ public class IncidentAgentAndLocationSampler {
         return result;
     }
 
-    private static void sampleValues(Environment environment, ActionPlan plan)
+    private static void sampleValuesForVariables(ActionPlan plan, Environment environment)
             throws Exception {
 
-        // Find random instances for all open variables
+        // Find random instances for all open variables.
         for (Variable v : plan.getVariables()) {
             if (v.getValue() == null) {
 
@@ -199,9 +220,9 @@ public class IncidentAgentAndLocationSampler {
                     if (!gv.areAgentsProvided()) {
                         int numMembers = gv.getNumMembers();
                         if (numMembers == GroupVariable.ANY_NUMBER_OF_MEMBERS) {
-                            numMembers = 1; // TODO If we don't specify how many members are needed, we always assume we need one.
+                            numMembers = 1; // If we don't specify how many members are needed, we always assume we need one.
                         }
-                        List<Agent> agents = new AgentSampler(environment.getAgents(), numMembers, gv.getMemberRole(), Double.MAX_VALUE, null, 1).sampleAgents();
+                        List<Agent> agents = sampleAgents(environment.getAgents(), numMembers, gv.getMemberRole(), Double.MAX_VALUE, null, 1);
                         Group group = new Group(agents);
                         gv.setValue(group);
                     } else {
@@ -210,5 +231,37 @@ public class IncidentAgentAndLocationSampler {
                 }
             }
         }
+    }
+
+    private static List<Agent> sampleAgents(List<Agent> agents, int numAgents, Class<? extends Role> memberRole, double maxDistanceTo, Point target, double improvementBound) {
+        AgentFinder agentFinder = new AgentFinder(agents, memberRole, target, maxDistanceTo, improvementBound);
+        List<Agent> result = new ArrayList<>(numAgents);
+        int[] selectedAgents = new int[numAgents];
+        Arrays.fill(selectedAgents, 0, selectedAgents.length, -1);
+        int numRandomSamples = 0;
+        int linearAgentIndex = -1;
+        for (int i = 0; i < numAgents; ++i) {
+            // Random search
+            if (numRandomSamples < Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES) {
+                boolean found = false;
+                while (!found && numRandomSamples < Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES) {
+                    int randomAgentIndex = agentFinder.findSuitableAgentUsingRandomSearch(selectedAgents, numRandomSamples, Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES);
+                    if (randomAgentIndex >= 0) {
+                        selectedAgents[i] = randomAgentIndex;
+                        result.add(agents.get(randomAgentIndex));
+                        found = true;
+                    }
+                    ++numRandomSamples;
+                }
+            } else {
+                // Linear search, starting from previously found agent index
+                linearAgentIndex = agentFinder.findSuitableAgentUsingLinearSearch(selectedAgents, linearAgentIndex + 1);
+                if (linearAgentIndex >= 0) {
+                    selectedAgents[i] = linearAgentIndex;
+                    result.add(agents.get(linearAgentIndex));
+                }
+            }
+        }
+        return result;
     }
 }
