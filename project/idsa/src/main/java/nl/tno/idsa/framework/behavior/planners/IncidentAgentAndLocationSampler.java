@@ -165,7 +165,11 @@ public class IncidentAgentAndLocationSampler {
     }
 
     private static List<Agent> sampleAgentsCloserTo(List<Agent> agents, GroupVariable gv, IGeometry tgt, double improvementBound) {
-        return sampleAgents(agents, gv.getNumMembers(), gv.getMemberRole(), maxDistanceTo(gv.getValue(), tgt), tgt.getFirstPoint(), improvementBound);
+        int numAgents = gv.getNumMembers();
+        if (numAgents == GroupVariable.ANY_NUMBER_OF_MEMBERS) {
+            numAgents = 1; // Any number now assumes at least 1
+        }
+        return sampleAgents(agents, numAgents, gv.getMemberRole(), maxDistanceTo(gv.getValue(), tgt), tgt.getFirstPoint(), improvementBound);
     }
 
     private static double maxDistanceTo(Group agents, IGeometry tgt) {
@@ -234,31 +238,33 @@ public class IncidentAgentAndLocationSampler {
     }
 
     private static List<Agent> sampleAgents(List<Agent> agents, int numAgents, Class<? extends Role> memberRole, double maxDistanceTo, Point target, double improvementBound) {
-        AgentFinder agentFinder = new AgentFinder(agents, memberRole, target, maxDistanceTo, improvementBound);
-        List<Agent> result = new ArrayList<>(numAgents);
-        int[] selectedAgents = new int[numAgents];
-        Arrays.fill(selectedAgents, 0, selectedAgents.length, -1);
-        int numRandomSamples = 0;
-        int linearAgentIndex = -1;
-        for (int i = 0; i < numAgents; ++i) {
-            // Random search
-            if (numRandomSamples < Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES) {
-                boolean found = false;
-                while (!found && numRandomSamples < Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES) {
-                    int randomAgentIndex = agentFinder.findSuitableAgentUsingRandomSearch(selectedAgents, numRandomSamples, Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES);
-                    if (randomAgentIndex >= 0) {
-                        selectedAgents[i] = randomAgentIndex;
-                        result.add(agents.get(randomAgentIndex));
-                        found = true;
+        List<Agent> result = new ArrayList<>(Math.max(0, numAgents));
+        if (numAgents > 0) {           
+            AgentFinder agentFinder = new AgentFinder(agents, memberRole, target, maxDistanceTo, improvementBound);
+            int[] selectedAgents = new int[numAgents];
+            Arrays.fill(selectedAgents, 0, selectedAgents.length, -1);
+            int numRandomSamples = 0;
+            int linearAgentIndex = -1;
+            for (int i = 0; i < numAgents; ++i) {
+                // Random search
+                if (numRandomSamples < Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES) {
+                    boolean found = false;
+                    while (!found && numRandomSamples < Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES) {
+                        int randomAgentIndex = agentFinder.findSuitableAgentUsingRandomSearch(selectedAgents, numRandomSamples, Constants.INCIDENT_MAX_RANDOM_AGENT_SAMPLES);
+                        if (randomAgentIndex >= 0) {
+                            selectedAgents[i] = randomAgentIndex;
+                            result.add(agents.get(randomAgentIndex));
+                            found = true;
+                        }
+                        ++numRandomSamples;
                     }
-                    ++numRandomSamples;
-                }
-            } else {
-                // Linear search, starting from previously found agent index
-                linearAgentIndex = agentFinder.findSuitableAgentUsingLinearSearch(selectedAgents, linearAgentIndex + 1);
-                if (linearAgentIndex >= 0) {
-                    selectedAgents[i] = linearAgentIndex;
-                    result.add(agents.get(linearAgentIndex));
+                } else {
+                    // Linear search, starting from previously found agent index
+                    linearAgentIndex = agentFinder.findSuitableAgentUsingLinearSearch(selectedAgents, linearAgentIndex + 1);
+                    if (linearAgentIndex >= 0) {
+                        selectedAgents[i] = linearAgentIndex;
+                        result.add(agents.get(linearAgentIndex));
+                    }
                 }
             }
         }
