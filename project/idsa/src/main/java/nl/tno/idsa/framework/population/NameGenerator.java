@@ -34,8 +34,8 @@ public class NameGenerator {
     private HashMap<Integer, List<NameData>> lastNames = new HashMap<>();
 
     private NameGenerator(String language_id) throws IOException {
-
-        String firstNames = readFile("../../data/nl/names/firstnames_" + language_id + ".csv");
+        // System.out.println("Working Directory = " + System.getProperty("user.dir"));
+        String firstNames = readFile(String.format("./data/nl/names/firstnames_%s.csv", language_id));
         String[] firstNameLines = firstNames.split("\n");
         for (String line : firstNameLines) {
             try {
@@ -63,7 +63,7 @@ public class NameGenerator {
             }
         }
 
-        String lastNames = readFile("../../data/nl/names/lastnames_" + language_id + ".csv");
+        String lastNames = readFile("./data/nl/names/lastnames_" + language_id + ".csv");
         String[] lastNameLines = lastNames.split("\n");
         for (String line : lastNameLines) {
             try {
