@@ -74,7 +74,7 @@ public class Agent implements ISimulatedObject {
             try {
                 name = NameGenerator.getInstance(Constants.POPULATION_NAMES_LANGUAGE_ID).generateName(year, gender, age);
             } catch (Exception e) {
-                // e.printStackTrace();
+                e.printStackTrace();
                 name = new String[]{"?", "?"};
             }
         }

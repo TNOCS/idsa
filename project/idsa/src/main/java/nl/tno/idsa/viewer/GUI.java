@@ -4,6 +4,7 @@ import nl.tno.idsa.Constants;
 import nl.tno.idsa.framework.agents.Agent;
 import nl.tno.idsa.framework.messaging.Messenger;
 import nl.tno.idsa.framework.messaging.ProgressNotifier;
+import nl.tno.idsa.framework.population.NameGenerator;
 import nl.tno.idsa.framework.population.PopulationGenerator;
 import nl.tno.idsa.framework.simulator.Sim;
 import nl.tno.idsa.framework.utils.DataSourceFinder;
@@ -45,7 +46,7 @@ public class GUI {
             System.exit(0);
         }
         DataSourceFinder.DataSource dataSource = dataSourceSelectionDialog.getSelectedDataSource();
-
+        NameGenerator.getInstance(Constants.POPULATION_NAMES_LANGUAGE_ID); // Already load the names here
         // Create the world object.
         String path = dataSource.getPath();
         World world = WorldGenerator.generateWorld(dataSource.getWorldModel(),
